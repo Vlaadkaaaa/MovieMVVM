@@ -1,5 +1,5 @@
 // MovieViewCell.swift
-// Copyright © RoadMap. All rights reserved.
+// Copyright © Vlaadkaaaa. All rights reserved.
 
 import UIKit
 
@@ -8,7 +8,6 @@ final class MovieViewCell: UITableViewCell {
     // MARK: - Private Constants
 
     private enum Constants {
-        static let imageURL = "https://image.tmdb.org/t/p/w500"
         static let movieAgeLimitTitle = "18+"
         static let oneStarImageName = "oneStar"
         static let twoStarImageName = "twoStar"
@@ -67,6 +66,8 @@ final class MovieViewCell: UITableViewCell {
         return image
     }()
 
+    private let imageNetwork: ImageNetworkServiceProtocol = ImageNetworkService()
+
     // MARK: - Init
 
     override private init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -81,7 +82,7 @@ final class MovieViewCell: UITableViewCell {
 
     // MARK: Methods
 
-    func setupView(movie: Movies) {
+    func configureCell(movie: Movie) {
         setupImage(movie: movie)
         setupLabel(movie: movie)
     }
@@ -98,33 +99,36 @@ final class MovieViewCell: UITableViewCell {
         configureConstraints()
     }
 
-    private func setupImage(movie: Movies) {
-        guard let urlImage = URL(string: Constants.imageURL + movie.movieImageName) else { return }
-        let session = URLSession(configuration: .default)
-        let task = session.dataTask(with: urlImage) { data, _, error in
-            guard let data = data, error == nil else { return }
-            DispatchQueue.main.async {
-                let image = UIImage(data: data)
-                self.moviePosterImageView.image = image
+    private func setupImage(movie: Movie) {
+        imageNetwork.fetchImageData(path: movie.posterPath) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case let .success(data):
+                DispatchQueue.main.async {
+                    self.moviePosterImageView.image = UIImage(data: data)
+                }
+            case let .failure(error):
+                print(error.localizedDescription)
             }
         }
-        task.resume()
-        movieRatingImageView.image = {
-            switch movie.ratingValue {
-            case 0 ... 2: return UIImage(named: Constants.oneStarImageName)
-            case 2 ... 4: return UIImage(named: Constants.twoStarImageName)
-            case 4 ... 6: return UIImage(named: Constants.threeStarImageName)
-            case 6 ... 8: return UIImage(named: Constants.fourStarImageName)
-            case 8 ... 10: return UIImage(named: Constants.fiveStarImageName)
-            default: return UIImage(named: Constants.oneStarImageName)
-            }
-        }()
+        movieRatingImageView.image = UIImage(named: updateRating(voteAverage: movie.voteAverage))
     }
 
-    private func setupLabel(movie: Movies) {
-        genreNameLabel.text = movie.movieGenreName
-        movieNameLabel.text = movie.movieNameText
-        movieDateLabel.text = movie.movieDateText
+    private func updateRating(voteAverage: Double) -> String {
+        switch voteAverage {
+        case 0 ... 2: return Constants.oneStarImageName
+        case 2 ... 4: return Constants.twoStarImageName
+        case 4 ... 6: return Constants.threeStarImageName
+        case 6 ... 8: return Constants.fourStarImageName
+        case 8 ... 10: return Constants.fiveStarImageName
+        default: return Constants.oneStarImageName
+        }
+    }
+
+    private func setupLabel(movie: Movie) {
+        movieNameLabel.text = movie.title
+        genreNameLabel.text = movie.overview
+        movieDateLabel.text = movie.releaseDate
     }
 
     private func configureConstraints() {

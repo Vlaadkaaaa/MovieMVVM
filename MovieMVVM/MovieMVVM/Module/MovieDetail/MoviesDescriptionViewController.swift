@@ -1,5 +1,5 @@
 // MoviesDescriptionViewController.swift
-// Copyright © RoadMap. All rights reserved.
+// Copyright © Vlaadkaaaa. All rights reserved.
 
 import UIKit
 
@@ -27,7 +27,7 @@ final class MoviesDescriptionViewController: UIViewController {
         static let apiKeyURL = "api_key=d9e4494907230d135d6f6fd47beca82e"
         static let apiLanguageURL = "language=ru"
         static let apiResponseURL = "append_to_response=videos"
-        static let apiCreditsGenreURL = "credits"
+        static let apiCreditsGenreURL = "/credits"
     }
 
     // MARK: Private visual Components
@@ -197,29 +197,26 @@ final class MoviesDescriptionViewController: UIViewController {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.tintColor = .lightGray
-        view.addSubview(favotiteButton)
         view.addSubview(favotiteLabel)
-        view.addSubview(bookmarkButton)
+        view.addSubview(favotiteButton)
         view.addSubview(bookmarkLabel)
-        view.addSubview(button)
+        view.addSubview(bookmarkButton)
         view.addSubview(shareLabel)
-        view.addSubview(moreButton)
+        view.addSubview(button)
         view.addSubview(moreLabel)
-        detailConfigureConstraint()
+        view.addSubview(moreButton)
         return view
     }()
 
     // MARK: - Private Property
 
-    private let dateFormater = DateFormatter()
-    private var networkManager = NetworkManager()
-    private var actors: [Cast] = []
+    private var networkManager = NetworkService()
+    private var casts: [Cast] = []
     private var genres = String()
 
     // MARK: Public Property
 
-    var data: Results?
-    var genre = String()
+    var data: Movie?
 
     // MARK: - Lyfe Cycle
 
@@ -231,94 +228,87 @@ final class MoviesDescriptionViewController: UIViewController {
 
     // MARK: Private Methods
 
-    private func setupUI(data: Results?) {
+    private func setupUI(data: Movie?) {
         getAndSetupAnotherUI(data: data)
         setupGenre(data)
     }
 
-    private func setupGenre(_ data: Results?) {
-        guard let dataReleaseDate = data?.releaseDate,
-              let movieId = data?.id,
-              let url =
-              URL(
-                  string: "\(Constants.apiRequestURL)\(movieId)?" +
-                      "\(Constants.apiKeyURL)&\(Constants.apiResponseURL)&\(Constants.apiLanguageURL)"
-              )
-        else { return }
-        let session = URLSession.shared
-        let taskGenre = session.dataTask(with: url) { data, _, error in
-            if error == nil, let parseData = data {
-                guard let genre = try? JSONDecoder().decode(MovieGenreNetwork.self, from: parseData) else { return }
-                self.genres = String()
-                for genre in genre.genres {
-                    if self.genres.isEmpty {
-                        self.genres += genre.name
-                    } else {
-                        self.genres += ", " + genre.name
-                    }
-                    DispatchQueue.main.async {
-                        let date = self.dateFormater.date(from: dataReleaseDate)
-                        self.dateFormater.dateFormat = Constants.editDateFormat
-                        self.genreLabel.text = self.dateFormater.string(from: date ?? Date()) + ", " + self.genres
-                    }
-                }
-            }
-        }
-        taskGenre.resume()
-    }
-
-    private func getAndSetupAnotherUI(data: Results?) {
+    private func getAndSetupAnotherUI(data: Movie?) {
         view.addSubview(moviePosterImageView)
         view.addSubview(contentScrollView)
-        dateFormater.dateFormat = Constants.resultDateFormat
         guard let dataPosterImage = data?.posterPath,
               let dataRating = data?.voteAverage,
-              let movieId = data?.id,
-              let urlImage = URL(string: Constants.imageRequestURL + dataPosterImage)
+              let movieId = data?.id
         else { return }
-        let session = URLSession.shared
-        let task = session.dataTask(with: urlImage) { data, _, error in
-            guard let data = data, error == nil else { return }
-            DispatchQueue.main.async {
-                let image = UIImage(data: data)
-                self.moviePosterImageView.image = image
-            }
-        }
-        task.resume()
+        updateImage(dataPosterImage: dataPosterImage)
         movieNameLabel.text = data?.title
         ratingLabel.text = String(dataRating)
         descriptionLabel.text = data?.overview
-        ratingLabel.textColor = {
-            guard let rating = Double(ratingLabel.text ?? String()) else { return .lightGray }
-            switch rating {
-            case 5 ..< 7:
-                return .lightGray
-            case 7 ... 10:
-                return .green
-            default:
-                return .systemRed
-            }
-        }()
-        DispatchQueue.main.async {
-            guard let url =
-                URL(
-                    string: "\(Constants.apiRequestURL)\(movieId)/" +
-                        "\(Constants.apiCreditsGenreURL)?\(Constants.apiKeyURL)"
-                )
-            else { return }
-            let session = URLSession.shared
-            let decoder = JSONDecoder()
-            let task = session.dataTask(with: url) { data, _, error in
-                if error == nil, let parseData = data {
-                    guard let desription = try? decoder.decode(MoviewDescriptionNetwork.self, from: parseData)
-                    else { return }
-                    DispatchQueue.main.async {
-                        self.actors = desription.cast
-                        self.actorCollectionView.reloadData()
-                    }
+        ratingLabel.textColor = updateRating(rating: dataRating)
+        fetchCast(id: "\(movieId)\(Constants.apiCreditsGenreURL)")
+    }
+
+    private func fetchCast(id: String) {
+        networkManager.fetchCast(id: id) { result in
+            switch result {
+            case let .success(actor):
+                DispatchQueue.main.async {
+                    self.casts += actor.cast
+                    self.actorCollectionView.reloadData()
                 }
+            case let .failure(error):
+                print(error)
             }
-            task.resume()
+        }
+    }
+
+    private func updateRating(rating: Double) -> UIColor {
+        guard let rating = Double(ratingLabel.text ?? String()) else { return .lightGray }
+        switch rating {
+        case 5 ..< 7:
+            return .lightGray
+        case 7 ... 10:
+            return .green
+        default:
+            return .systemRed
+        }
+    }
+
+    private func updateImage(dataPosterImage: String) {
+        ImageNetworkService().fetchImageData(path: dataPosterImage) { result in
+            switch result {
+            case let .success(data):
+                DispatchQueue.main.async {
+                    self.moviePosterImageView.image = UIImage(data: data)
+                }
+            case let .failure(error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+
+    private func setupGenre(_ data: Movie?) {
+        guard let id = data?.id else { return }
+        networkManager.fetchDetail(id: "\(id)") { result in
+            switch result {
+            case let .success(genre):
+                self.updateGenres(genres: genre.genres)
+            case let .failure(failure):
+                print(failure.localizedDescription)
+            }
+        }
+    }
+
+    private func updateGenres(genres: [Genre]) {
+        for genre in genres {
+            if self.genres.isEmpty {
+                self.genres += genre.name
+            } else {
+                self.genres += ", " + genre.name
+            }
+            DispatchQueue.main.async {
+                self.genreLabel.text = self.genres
+            }
         }
     }
 
@@ -351,42 +341,13 @@ final class MoviesDescriptionViewController: UIViewController {
             descriptionLabel.widthAnchor.constraint(equalToConstant: 360)
         ])
     }
-
-    private func detailConfigureConstraint() {
-        NSLayoutConstraint.activate([
-            favotiteLabel.leadingAnchor.constraint(equalTo: tabBarActionView.leadingAnchor, constant: 0),
-            favotiteLabel.bottomAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: -5),
-            favotiteButton.centerXAnchor.constraint(equalTo: favotiteLabel.centerXAnchor, constant: 0),
-            favotiteButton.bottomAnchor.constraint(equalTo: favotiteLabel.topAnchor, constant: -5),
-            favotiteButton.heightAnchor.constraint(equalToConstant: 20),
-            favotiteButton.widthAnchor.constraint(equalToConstant: 20),
-            bookmarkLabel.leadingAnchor.constraint(equalTo: favotiteLabel.trailingAnchor, constant: 15),
-            bookmarkLabel.bottomAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: -5),
-            bookmarkButton.centerXAnchor.constraint(equalTo: bookmarkLabel.centerXAnchor, constant: 0),
-            bookmarkButton.bottomAnchor.constraint(equalTo: bookmarkLabel.topAnchor, constant: -5),
-            bookmarkButton.heightAnchor.constraint(equalToConstant: 20),
-            bookmarkButton.widthAnchor.constraint(equalToConstant: 20),
-            shareLabel.leadingAnchor.constraint(equalTo: bookmarkLabel.trailingAnchor, constant: 15),
-            shareLabel.bottomAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: -5),
-            button.centerXAnchor.constraint(equalTo: shareLabel.centerXAnchor, constant: 0),
-            button.bottomAnchor.constraint(equalTo: shareLabel.topAnchor, constant: -5),
-            button.heightAnchor.constraint(equalToConstant: 20),
-            button.widthAnchor.constraint(equalToConstant: 20),
-            moreLabel.leadingAnchor.constraint(equalTo: shareLabel.trailingAnchor, constant: 15),
-            moreLabel.bottomAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: -5),
-            moreButton.centerXAnchor.constraint(equalTo: moreLabel.centerXAnchor, constant: 0),
-            moreButton.bottomAnchor.constraint(equalTo: moreLabel.topAnchor, constant: -10),
-            moreButton.heightAnchor.constraint(equalToConstant: 7.5),
-            moreButton.widthAnchor.constraint(equalToConstant: 20),
-        ])
-    }
 }
 
 // MARK: - UICollectionViewDataSource, UICollectionViewDelegate
 
 extension MoviesDescriptionViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        actors.count
+        casts.count
     }
 
     func collectionView(
@@ -399,13 +360,7 @@ extension MoviesDescriptionViewController: UICollectionViewDataSource, UICollect
                 for: indexPath
             ) as? ActorCollectionViewCell
         else { return UICollectionViewCell() }
-        let actor = actors[indexPath.row]
-        let actors = Actor(
-            actorImageName: actor.profilePath ?? String(),
-            actorName: actor.name,
-            actorRoleName: actor.character
-        )
-        cell.setupActor(actors)
+        cell.setupActor(casts[indexPath.row])
         return cell
     }
 }

@@ -1,16 +1,10 @@
 // ActorCollectionViewCell.swift
-// Copyright © RoadMap. All rights reserved.
+// Copyright © Vlaadkaaaa. All rights reserved.
 
 import UIKit
 
 /// Настройка  Актеров
 final class ActorCollectionViewCell: UICollectionViewCell {
-    // MARK: Private Constant
-
-    private enum Constants {
-        static let getImageURL = "https://image.tmdb.org/t/p/w500"
-    }
-
     // MARK: - Private Visual Components
 
     private let actorImageView: UIImageView = {
@@ -34,6 +28,8 @@ final class ActorCollectionViewCell: UICollectionViewCell {
         label.numberOfLines = 2
         return label
     }()
+
+    private let imageService: ImageNetworkServiceProtocol = ImageNetworkService()
 
     // MARK: - Init
 
@@ -59,18 +55,18 @@ final class ActorCollectionViewCell: UICollectionViewCell {
 
     // MARK: - Public Metods
 
-    func setupActor(_ actror: Actor) {
-        guard let urlImage = URL(string: "\(Constants.getImageURL) \(actror.actorImageName)") else { return }
-        let session = URLSession(configuration: .default)
-        let task = session.dataTask(with: urlImage) { data, _, error in
-            guard let data = data, error == nil else { return }
-            DispatchQueue.main.async {
-                let image = UIImage(data: data)
-                self.actorImageView.image = image
+    func setupActor(_ actror: Cast) {
+        imageService.fetchImageData(path: actror.profilePath ?? "") { result in
+            switch result {
+            case let .success(data):
+                DispatchQueue.main.async {
+                    self.actorImageView.image = UIImage(data: data)
+                }
+            case let .failure(error):
+                print(error)
             }
         }
-        task.resume()
-        actorNameLabel.text = actror.actorName
-        actorRoleLabel.text = actror.actorRoleName
+        actorNameLabel.text = actror.name
+        actorRoleLabel.text = actror.character
     }
 }

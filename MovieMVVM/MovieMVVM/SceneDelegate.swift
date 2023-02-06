@@ -1,5 +1,5 @@
 // SceneDelegate.swift
-// Copyright © RoadMap. All rights reserved.
+// Copyright © Vlaadkaaaa. All rights reserved.
 
 import UIKit
 
@@ -14,8 +14,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
         let window = UIWindow(windowScene: windowScene)
-
-        window.rootViewController = TabBarController()
+        let navController = UINavigationController(rootViewController: MovieViewController())
+        window.rootViewController = navController
         self.window = window
         window.backgroundColor = .systemBackground
         window.makeKeyAndVisible()

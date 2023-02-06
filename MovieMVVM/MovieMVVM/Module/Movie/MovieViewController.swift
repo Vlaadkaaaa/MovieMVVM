@@ -1,5 +1,5 @@
 // MovieViewController.swift
-// Copyright © RoadMap. All rights reserved.
+// Copyright © Vlaadkaaaa. All rights reserved.
 
 import UIKit
 
@@ -12,13 +12,6 @@ final class MovieViewController: UIViewController {
         static let movieTitleText = "Фильмы"
         static let movieCellIdentifier = "MovieCell"
         static let genres = ["popular", "upcoming"]
-        static let resultDateFormat = "yyyy-MM-dd"
-        static let editDateFormat = "dd MMM yyyy"
-        static let adImageName = "adsLogo"
-        static let apiRequestURL = "https://api.themoviedb.org/3/movie/"
-        static let apiKeyURL = "api_key=d9e4494907230d135d6f6fd47beca82e"
-        static let apiLanguageURL = "language=ru"
-        static let appendResponseVideosURL = "append_to_response=videos"
     }
 
     // MARK: - Private Visual Component
@@ -39,10 +32,8 @@ final class MovieViewController: UIViewController {
 
     // MARK: Private Property
 
-    private let dateFormater = DateFormatter()
-    private var networkManager = NetworkManager()
-    private var moviewDataSource: MoviesNetwork?
-    private var movie: Movies?
+    private var movies: [Movie] = []
+    private var networkManager = NetworkService()
     private var genres = String()
 
     // MARK: - Lyfe Cycle
@@ -58,7 +49,6 @@ final class MovieViewController: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.tintColor = .white
         title = Constants.movieTitleText
-        dateFormater.dateFormat = Constants.resultDateFormat
         view.addSubview(filtherMovieSegmentControl)
         getMovies(genre: Constants.genres[0])
         setupRefreshControl()
@@ -79,25 +69,16 @@ final class MovieViewController: UIViewController {
         movieTableView.refreshControl = refresh
     }
 
-    @objc private func refreshPageAction() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.movieTableView.reloadData()
-            self.movieTableView.refreshControl?.endRefreshing()
-        }
-    }
-
     private func getMovies(genre: String) {
-        networkManager.getMovies(genre: genre) { [weak self] result in
+        networkManager.fetchMovies(category: genre, page: 1) { result in
             switch result {
-            case let .successMovies(movies):
-                self?.moviewDataSource = movies
+            case let .success(data):
                 DispatchQueue.main.async {
-                    self?.movieTableView.reloadData()
+                    self.movies = data.movies
+                    self.movieTableView.reloadData()
                 }
             case let .failure(error):
-                print(error)
-            default:
-                break
+                print(error.localizedDescription)
             }
         }
     }
@@ -114,29 +95,11 @@ final class MovieViewController: UIViewController {
         ])
     }
 
-    private func getMovieGenre(data: Results?) {
-        guard let movieId = data?.id,
-              let url =
-              URL(
-                  string: "\(Constants.apiRequestURL)\(movieId)?\(Constants.apiKeyURL)&" +
-                      "\(Constants.appendResponseVideosURL)&\(Constants.apiLanguageURL)"
-              )
-        else { return }
-        let session = URLSession.shared
-        let task = session.dataTask(with: url) { data, _, error in
-            if error == nil, let parseData = data {
-                guard let genre = try? JSONDecoder().decode(MovieGenreNetwork.self, from: parseData) else { return }
-                self.genres = String()
-                for genre in genre.genres {
-                    if self.genres.isEmpty {
-                        self.genres += genre.name
-                    } else {
-                        self.genres += ", " + genre.name
-                    }
-                }
-            }
+    @objc private func refreshPageAction() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.movieTableView.reloadData()
+            self.movieTableView.refreshControl?.endRefreshing()
         }
-        task.resume()
     }
 
     @objc private func changeSegmentAction(_ sender: UISegmentedControl) {
@@ -149,44 +112,30 @@ final class MovieViewController: UIViewController {
     }
 }
 
-// MARK: - UITableViewDelegate, UITableViewDataSource
+// MARK: - UITableViewDataSource
 
-extension MovieViewController: UITableViewDelegate, UITableViewDataSource {
+extension MovieViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        moviewDataSource?.results.count ?? 0
+        movies.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let data = moviewDataSource?.results[indexPath.row]
-    
-            let cell = tableView.dequeueReusableCell(
-                withIdentifier: Constants.movieCellIdentifier,
-                for: indexPath
-            ) as? MovieViewCell
-            cell?.selectionStyle = .none
-            guard let dataRelease = data?.releaseDate,
-                  let dataPosterPath = data?.posterPath,
-                  let dataTitle = data?.title,
-                  let dataVoteAverange = data?.voteAverage else { fatalError() }
-            let date = dateFormater.date(from: dataRelease)
-            dateFormater.dateFormat = Constants.editDateFormat
-            getMovieGenre(data: data)
-            let movie = Movies(
-                movieImageName: dataPosterPath,
-                movieGenreName: genres,
-                movieNameText: dataTitle,
-                movieDateText: dateFormater.string(from: date ?? Date()),
-                ratingValue: dataVoteAverange
-            )
-            self.movie = movie
-            cell?.setupView(movie: movie)
-            return cell ?? UITableViewCell()
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: Constants.movieCellIdentifier,
+            for: indexPath
+        ) as? MovieViewCell
+        cell?.selectionStyle = .none
+        cell?.configureCell(movie: movies[indexPath.row])
+        return cell ?? UITableViewCell()
     }
+}
 
+// MARK: - UITableViewDelegate
+
+extension MovieViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let vc = MoviesDescriptionViewController()
-        let data = moviewDataSource?.results[indexPath.row]
-        vc.data = data
+        vc.data = movies[indexPath.row]
         navigationController?.pushViewController(vc, animated: true)
     }
 }
