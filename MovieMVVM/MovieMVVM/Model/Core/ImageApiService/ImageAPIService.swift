@@ -1,10 +1,10 @@
-// ImageNetworkService.swift
+// ImageAPIService.swift
 // Copyright © Vlaadkaaaa. All rights reserved.
 
 import Foundation
 
 /// Сервис загрузки изображений из сети
-final class ImageNetworkService: ImageNetworkServiceProtocol {
+final class ImageAPIService: ImageAPIServiceProtocol {
     // MARK: - Private Constants
 
     private enum UrlComponent {

@@ -3,7 +3,7 @@
 
 import Foundation
 
-///
+/// Состояния главного экрана
 enum MovieViewData {
     case loading
     case success([Movie])

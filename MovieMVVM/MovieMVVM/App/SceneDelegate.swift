@@ -6,7 +6,7 @@ import UIKit
 /// SceneDelegate
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
-    var coordinator: MovieCoordinator?
+    var coordinator: ApplicationCoordinator?
 
     func scene(
         _ scene: UIScene,
@@ -19,7 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.makeKeyAndVisible()
         let bilder = Bilder()
         let navController = UINavigationController()
-        coordinator = MovieCoordinator(navigationController: navController, bilder: bilder)
+        coordinator = ApplicationCoordinator(navigationController: navController, bilder: bilder)
         coordinator?.start()
     }
 }

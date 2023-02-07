@@ -3,6 +3,7 @@
 
 import Foundation
 
+/// ViewModel для экрана с деталями о фильме
 final class MovieDetailViewModel: MovieDetailViewModelProtocol {
     // MARK: - Public Property
 
@@ -10,11 +11,11 @@ final class MovieDetailViewModel: MovieDetailViewModelProtocol {
     var updateGenre: ((String) -> Void)?
     var updateImage: ((Data) -> Void)?
     var updateColor: ((String) -> Void)?
-    var imageService: ImageNetworkServiceProtocol?
+    var imageService: ImageServiceProtocol?
 
     // MARK: - Init
 
-    init(networkService: NetworkServiceProtocol?, imageService: ImageNetworkServiceProtocol?) {
+    init(networkService: NetworkServiceProtocol?, imageService: ImageServiceProtocol?) {
         self.networkService = networkService
         self.imageService = imageService
     }
@@ -48,10 +49,12 @@ final class MovieDetailViewModel: MovieDetailViewModelProtocol {
     }
 
     func fetchImageData(path: String) {
-        imageService?.fetchImageData(path: path) { result in
+        imageService?.loadImage(path: path) { result in
             switch result {
             case let .success(data):
-                self.updateImage?(data)
+                DispatchQueue.main.async {
+                    self.updateImage?(data)
+                }
             case let .failure(error):
                 print(error)
             }
@@ -61,11 +64,17 @@ final class MovieDetailViewModel: MovieDetailViewModelProtocol {
     func updateColor(rating: Double) {
         switch rating {
         case 5 ..< 7:
-            updateColor?("lightGray")
+            DispatchQueue.main.async {
+                self.updateColor?("lightGray")
+            }
         case 7 ... 10:
-            updateColor?("systemGreen")
+            DispatchQueue.main.async {
+                self.updateColor?("green")
+            }
         default:
-            updateColor?("systemRed")
+            DispatchQueue.main.async {
+                self.updateColor?("red")
+            }
         }
     }
 

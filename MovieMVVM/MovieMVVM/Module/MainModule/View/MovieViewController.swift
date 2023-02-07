@@ -48,7 +48,7 @@ final class MovieViewController: UIViewController {
                     self.movieTableView.reloadData()
                 }
             case let .failure(error):
-                print(error.localizedDescription)
+                showAlert(message: error.localizedDescription)
             }
         }
     }
@@ -64,7 +64,7 @@ final class MovieViewController: UIViewController {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        fatalError()
     }
 
     // MARK: - Lyfe Cycle

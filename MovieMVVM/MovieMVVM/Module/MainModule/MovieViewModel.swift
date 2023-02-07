@@ -3,13 +3,14 @@
 
 import Foundation
 
+/// ViewModel для главного экрана
 final class MovieViewModel: MovieViewModelProtocol {
     // MARK: - Public Property
 
     var updateViewData: ((MovieViewData) -> Void)?
-    var imageService: ImageNetworkServiceProtocol?
+    var imageService: ImageServiceProtocol?
 
-    init(networkService: NetworkServiceProtocol, imageService: ImageNetworkServiceProtocol?) {
+    init(networkService: NetworkServiceProtocol, imageService: ImageServiceProtocol?) {
         self.networkService = networkService
         self.imageService = imageService
     }

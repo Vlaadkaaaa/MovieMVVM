@@ -75,12 +75,12 @@ final class MovieViewCell: UITableViewCell {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("")
+        fatalError()
     }
 
     // MARK: Methods
 
-    func configureCell(movie: Movie, imageService: ImageNetworkServiceProtocol) {
+    func configureCell(movie: Movie, imageService: ImageServiceProtocol) {
         setupImage(movie: movie, imageService: imageService)
         setupLabel(movie: movie)
     }
@@ -97,8 +97,8 @@ final class MovieViewCell: UITableViewCell {
         configureConstraints()
     }
 
-    private func setupImage(movie: Movie, imageService: ImageNetworkServiceProtocol) {
-        imageService.fetchImageData(path: movie.posterPath) { [weak self] result in
+    private func setupImage(movie: Movie, imageService: ImageServiceProtocol) {
+        imageService.loadImage(path: movie.posterPath) { [weak self] result in
             guard let self else { return }
             switch result {
             case let .success(data):

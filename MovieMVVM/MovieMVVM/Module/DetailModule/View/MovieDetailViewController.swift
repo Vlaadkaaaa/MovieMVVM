@@ -27,7 +27,7 @@ final class MovieDetailViewController: UIViewController {
 
     // MARK: Private visual Components
 
-    private let moviePosterImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 400, height: 500))
+    private lazy var moviePosterImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 400, height: 500))
 
     private lazy var contentScrollView: UIScrollView = {
         let scroll = UIScrollView(frame: view.bounds)
@@ -40,15 +40,19 @@ final class MovieDetailViewController: UIViewController {
     private lazy var backgroundBlackView: UIView = {
         let view = UIView(frame: CGRect(x: 0, y: 300, width: view.bounds.width, height: 1000))
         view.backgroundColor = .black
-        view.addSubview(movieNameLabel)
-        view.addSubview(ratingLabel)
-        view.addSubview(genreLabel)
-        view.addSubview(seeMovieButton)
-        view.addSubview(tabBarActionView)
-        view.addSubview(actorCollectionView)
-        view.addSubview(actorsLabel)
-        view.addSubview(descriptionLabel)
-        view.addSubview(descriptionTitleLabel)
+        var views = [
+            movieNameLabel,
+            ratingLabel,
+            genreLabel,
+            seeMovieButton,
+            downloadMovieButton,
+            tabBarActionView,
+            actorCollectionView,
+            actorsLabel,
+            descriptionLabel,
+            descriptionTitleLabel
+        ]
+        views.forEach { view.addSubview($0) }
         return view
     }()
 
@@ -78,10 +82,22 @@ final class MovieDetailViewController: UIViewController {
         return label
     }()
 
-    private let seeMovieButton: UIButton = {
+    private lazy var seeMovieButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setBackgroundImage(UIImage(named: Constants.watchImageName), for: .normal)
+        button.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        button.imageView?.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+        button.imageEdgeInsets.right = 30
+        button.setTitle("Смотреть", for: .normal)
+        button.applyGradient(colors: [UIColor.orange.cgColor, UIColor.yellow.cgColor])
+        return button
+    }()
+
+    private var downloadMovieButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setBackgroundImage(UIImage(systemName: "square.and.arrow.down"), for: .normal)
+        button.tintColor = .gray
         return button
     }()
 
@@ -92,7 +108,6 @@ final class MovieDetailViewController: UIViewController {
         collectionView.contentSize = CGSize(width: 1000, height: 250)
         collectionView.register(ActorCollectionViewCell.self, forCellWithReuseIdentifier: Constants.actorCellIdentifier)
         collectionView.dataSource = self
-        collectionView.delegate = self
         return collectionView
     }()
 
@@ -128,11 +143,20 @@ final class MovieDetailViewController: UIViewController {
         return label
     }()
 
+    private var hStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.distribution = .fillEqually
+        stack.spacing = 7
+        return stack
+
+    }()
+
     private lazy var favotiteButton: UIButton = createMoreButton(imageName: Constants.starSystemImageName)
     private lazy var favotiteLabel: UILabel = createMoreLabel(text: Constants.favoriteTitleText)
     private lazy var bookmarkButton: UIButton = createMoreButton(imageName: Constants.bookmarkSystemImageName)
     private lazy var bookmarkLabel: UILabel = createMoreLabel(text: Constants.bookmarkTitleText)
-    private lazy var button: UIButton = createMoreButton(imageName: Constants.shareSystemImageName)
+    private lazy var shareButton: UIButton = createMoreButton(imageName: Constants.shareSystemImageName)
     private lazy var shareLabel: UILabel = createMoreLabel(text: Constants.shareTitleText)
     private lazy var moreButton: UIButton = createMoreButton(imageName: Constants.moreSystemImageName)
     private lazy var moreLabel: UILabel = createMoreLabel(text: Constants.moreTitleText)
@@ -141,16 +165,14 @@ final class MovieDetailViewController: UIViewController {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.tintColor = .lightGray
-        view.addSubview(favotiteLabel)
-        view.addSubview(favotiteButton)
-        view.addSubview(bookmarkLabel)
-        view.addSubview(bookmarkButton)
-        view.addSubview(shareLabel)
-        view.addSubview(button)
-        view.addSubview(moreLabel)
-        view.addSubview(moreButton)
         return view
     }()
+
+    private func configureMoreBlock() {
+        tabBarActionView.addSubview(hStackView)
+        addButtonsToStackView()
+        setStackConstraint()
+    }
 
     // MARK: - Init
 
@@ -161,7 +183,7 @@ final class MovieDetailViewController: UIViewController {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        fatalError()
     }
 
     // MARK: - Private Property
@@ -180,6 +202,7 @@ final class MovieDetailViewController: UIViewController {
         super.viewDidLoad()
         setupUI(data: data)
         configureConstraint()
+        configureMoreBlock()
     }
 
     // MARK: Private Methods
@@ -189,10 +212,16 @@ final class MovieDetailViewController: UIViewController {
         view.addSubview(contentScrollView)
         updateUI(from: data)
         fetchGenre(data)
+        setupNavBar()
+    }
+
+    private func setupNavBar() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(systemItem: .action)
     }
 
     private func updateUI(from data: Movie?) {
         fetchImage(dataPosterImage: data?.posterPath)
+        updateImage()
         movieNameLabel.text = data?.title
         updateRating(rating: data?.voteAverage)
         descriptionLabel.text = data?.overview
@@ -230,7 +259,6 @@ final class MovieDetailViewController: UIViewController {
     private func fetchImage(dataPosterImage: String?) {
         guard let dataPosterImage else { return }
         detailViewModel?.fetchImageData(path: dataPosterImage)
-        updateImage()
     }
 
     private func updateImage() {
@@ -259,7 +287,7 @@ final class MovieDetailViewController: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = text
-        label.font = .systemFont(ofSize: 11)
+        label.font = .boldSystemFont(ofSize: 11)
         return label
     }
 
@@ -268,6 +296,38 @@ final class MovieDetailViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setBackgroundImage(UIImage(systemName: imageName), for: .normal)
         return button
+    }
+
+    func createVStack(button: UIButton, label: UILabel) -> UIStackView {
+        let vStack = UIStackView()
+        vStack.axis = .vertical
+        vStack.distribution = .fillEqually
+        vStack.alignment = .center
+        vStack.spacing = 5
+        vStack.addArrangedSubview(button)
+        vStack.addArrangedSubview(label)
+        return vStack
+    }
+
+    func addButtonsToStackView() {
+        hStackView.addArrangedSubview(createVStack(button: favotiteButton, label: favotiteLabel))
+        hStackView.addArrangedSubview(createVStack(button: bookmarkButton, label: bookmarkLabel))
+        hStackView.addArrangedSubview(createVStack(button: shareButton, label: shareLabel))
+        hStackView.addArrangedSubview(createVStack(button: moreButton, label: moreLabel))
+    }
+
+    private func setStackConstraint() {
+        hStackView.translatesAutoresizingMaskIntoConstraints = false
+        hStackView.topAnchor.constraint(equalTo: tabBarActionView.safeAreaLayoutGuide.topAnchor, constant: 0)
+            .isActive = true
+        hStackView.leadingAnchor.constraint(equalTo: tabBarActionView.safeAreaLayoutGuide.leadingAnchor, constant: 0)
+            .isActive = true
+        hStackView.trailingAnchor.constraint(
+            equalTo: tabBarActionView.safeAreaLayoutGuide.trailingAnchor,
+            constant: 0
+        )
+        .isActive = true
+        hStackView.heightAnchor.constraint(equalToConstant: 50).isActive = true
     }
 
     private func configureConstraint() {
@@ -280,14 +340,18 @@ final class MovieDetailViewController: UIViewController {
             genreLabel.topAnchor.constraint(equalTo: ratingLabel.bottomAnchor, constant: 5),
             genreLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
             seeMovieButton.topAnchor.constraint(equalTo: genreLabel.bottomAnchor, constant: 10),
-            seeMovieButton.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
+            seeMovieButton.leadingAnchor.constraint(equalTo: backgroundBlackView.leadingAnchor, constant: 60),
             seeMovieButton.heightAnchor.constraint(equalToConstant: 70),
-            seeMovieButton.widthAnchor.constraint(equalToConstant: 250),
-            tabBarActionView.topAnchor.constraint(equalTo: seeMovieButton.bottomAnchor, constant: 70),
-            tabBarActionView.leadingAnchor.constraint(equalTo: backgroundBlackView.leadingAnchor, constant: 60),
-            actorsLabel.topAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: 20),
+            seeMovieButton.widthAnchor.constraint(equalToConstant: 200),
+            downloadMovieButton.leadingAnchor.constraint(equalTo: seeMovieButton.trailingAnchor, constant: 20),
+            downloadMovieButton.centerYAnchor.constraint(equalTo: seeMovieButton.centerYAnchor),
+            downloadMovieButton.heightAnchor.constraint(equalToConstant: 25),
+            downloadMovieButton.widthAnchor.constraint(equalToConstant: 25),
+            tabBarActionView.topAnchor.constraint(equalTo: seeMovieButton.bottomAnchor, constant: 30),
+            tabBarActionView.centerXAnchor.constraint(equalTo: backgroundBlackView.centerXAnchor),
+            actorsLabel.topAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: 63),
             actorsLabel.leadingAnchor.constraint(equalTo: backgroundBlackView.leadingAnchor, constant: 20),
-            actorCollectionView.topAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: 50),
+            actorCollectionView.topAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: 93),
             actorCollectionView.leadingAnchor.constraint(equalTo: backgroundBlackView.leadingAnchor, constant: 0),
             actorCollectionView.trailingAnchor.constraint(equalTo: backgroundBlackView.trailingAnchor, constant: 0),
             actorCollectionView.heightAnchor.constraint(equalToConstant: 250),
@@ -301,9 +365,9 @@ final class MovieDetailViewController: UIViewController {
     }
 }
 
-// MARK: - UICollectionViewDataSource, UICollectionViewDelegate
+// MARK: - UICollectionViewDataSource
 
-extension MovieDetailViewController: UICollectionViewDataSource, UICollectionViewDelegate {
+extension MovieDetailViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         casts.count
     }

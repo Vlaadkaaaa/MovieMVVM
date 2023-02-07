@@ -38,7 +38,7 @@ final class ActorCollectionViewCell: UICollectionViewCell {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("")
+        fatalError()
     }
 
     // MARK: - Private Metods
@@ -53,8 +53,11 @@ final class ActorCollectionViewCell: UICollectionViewCell {
 
     // MARK: - Public Metods
 
-    func congigureCell(_ actror: Cast, imageService: ImageNetworkServiceProtocol) {
-        imageService.fetchImageData(path: actror.profilePath ?? "") { result in
+    func congigureCell(_ actror: Cast, imageService: ImageServiceProtocol) {
+        actorNameLabel.text = actror.name
+        actorRoleLabel.text = actror.character
+        guard let path = actror.profilePath else { return }
+        imageService.loadImage(path: path) { result in
             switch result {
             case let .success(data):
                 DispatchQueue.main.async {
@@ -64,7 +67,5 @@ final class ActorCollectionViewCell: UICollectionViewCell {
                 print(error)
             }
         }
-        actorNameLabel.text = actror.name
-        actorRoleLabel.text = actror.character
     }
 }

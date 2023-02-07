@@ -1,9 +1,10 @@
-// MovieCoordinator.swift
+// ApplicationCoordinator.swift
 // Copyright © Vlaadkaaaa. All rights reserved.
 
 import UIKit
 
-final class MovieCoordinator: BaseCoordinator {
+/// Главный координатор
+final class ApplicationCoordinator: BaseCoordinator {
     // MARK: - Private Properties
 
     private var bilder: BilderProtocol

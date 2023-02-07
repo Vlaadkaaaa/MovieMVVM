@@ -3,9 +3,9 @@
 
 import Foundation
 
-/// Протокол для
+/// Протокол для ViewModel экрана списка фильмов
 protocol MovieViewModelProtocol {
-    var imageService: ImageNetworkServiceProtocol? { get set }
+    var imageService: ImageServiceProtocol? { get set }
     var updateViewData: ((MovieViewData) -> Void)? { get set }
     func fetchMovie(category: MovieCategory?)
 }

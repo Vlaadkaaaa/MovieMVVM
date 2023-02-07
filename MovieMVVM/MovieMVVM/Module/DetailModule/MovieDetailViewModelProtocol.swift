@@ -3,8 +3,9 @@
 
 import UIKit
 
+/// Проткол для ViewModel экрана с деталями о фильме
 protocol MovieDetailViewModelProtocol {
-    var imageService: ImageNetworkServiceProtocol? { get set }
+    var imageService: ImageServiceProtocol? { get set }
     var updateViewData: (([Cast]) -> Void)? { get set }
     var updateGenre: ((String) -> Void)? { get set }
     var updateImage: ((Data) -> Void)? { get set }
