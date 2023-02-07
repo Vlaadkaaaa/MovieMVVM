@@ -29,8 +29,6 @@ final class ActorCollectionViewCell: UICollectionViewCell {
         return label
     }()
 
-    private let imageService: ImageNetworkServiceProtocol = ImageNetworkService()
-
     // MARK: - Init
 
     override private init(frame: CGRect) {
@@ -55,7 +53,7 @@ final class ActorCollectionViewCell: UICollectionViewCell {
 
     // MARK: - Public Metods
 
-    func setupActor(_ actror: Cast) {
+    func congigureCell(_ actror: Cast, imageService: ImageNetworkServiceProtocol) {
         imageService.fetchImageData(path: actror.profilePath ?? "") { result in
             switch result {
             case let .success(data):

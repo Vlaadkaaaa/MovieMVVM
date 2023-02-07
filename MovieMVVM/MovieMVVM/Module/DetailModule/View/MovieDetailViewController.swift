@@ -1,10 +1,10 @@
-// MoviesDescriptionViewController.swift
+// MovieDetailViewController.swift
 // Copyright © Vlaadkaaaa. All rights reserved.
 
 import UIKit
 
 /// Страница конкретного фильма
-final class MoviesDescriptionViewController: UIViewController {
+final class MovieDetailViewController: UIViewController {
     // MARK: Private Constant
 
     private enum Constants {
@@ -22,11 +22,6 @@ final class MoviesDescriptionViewController: UIViewController {
         static let bookmarkTitleText = "Буду смотреть"
         static let shareTitleText = "Поделиться"
         static let moreTitleText = "Ещё"
-        static let imageRequestURL = "https://image.tmdb.org/t/p/w500"
-        static let apiRequestURL = "https://api.themoviedb.org/3/movie/"
-        static let apiKeyURL = "api_key=d9e4494907230d135d6f6fd47beca82e"
-        static let apiLanguageURL = "language=ru"
-        static let apiResponseURL = "append_to_response=videos"
         static let apiCreditsGenreURL = "/credits"
     }
 
@@ -43,7 +38,7 @@ final class MoviesDescriptionViewController: UIViewController {
     }()
 
     private lazy var backgroundBlackView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: 300, width: 400, height: 1000))
+        let view = UIView(frame: CGRect(x: 0, y: 300, width: view.bounds.width, height: 1000))
         view.backgroundColor = .black
         view.addSubview(movieNameLabel)
         view.addSubview(ratingLabel)
@@ -133,65 +128,14 @@ final class MoviesDescriptionViewController: UIViewController {
         return label
     }()
 
-    private let favotiteButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setBackgroundImage(UIImage(systemName: Constants.starSystemImageName), for: .normal)
-        return button
-    }()
-
-    private let favotiteLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = Constants.favoriteTitleText
-        label.font = .systemFont(ofSize: 11)
-        return label
-    }()
-
-    private let bookmarkButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setBackgroundImage(UIImage(systemName: Constants.bookmarkSystemImageName), for: .normal)
-        return button
-    }()
-
-    private let bookmarkLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = Constants.bookmarkTitleText
-        label.font = .systemFont(ofSize: 11)
-        return label
-    }()
-
-    private let button: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setBackgroundImage(UIImage(systemName: Constants.shareSystemImageName), for: .normal)
-        return button
-    }()
-
-    private let shareLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = Constants.shareTitleText
-        label.font = .systemFont(ofSize: 11)
-        return label
-    }()
-
-    private let moreButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setBackgroundImage(UIImage(systemName: Constants.moreSystemImageName), for: .normal)
-        return button
-    }()
-
-    private let moreLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = Constants.moreTitleText
-        label.font = .systemFont(ofSize: 11)
-        return label
-    }()
+    private lazy var favotiteButton: UIButton = createMoreButton(imageName: Constants.starSystemImageName)
+    private lazy var favotiteLabel: UILabel = createMoreLabel(text: Constants.favoriteTitleText)
+    private lazy var bookmarkButton: UIButton = createMoreButton(imageName: Constants.bookmarkSystemImageName)
+    private lazy var bookmarkLabel: UILabel = createMoreLabel(text: Constants.bookmarkTitleText)
+    private lazy var button: UIButton = createMoreButton(imageName: Constants.shareSystemImageName)
+    private lazy var shareLabel: UILabel = createMoreLabel(text: Constants.shareTitleText)
+    private lazy var moreButton: UIButton = createMoreButton(imageName: Constants.moreSystemImageName)
+    private lazy var moreLabel: UILabel = createMoreLabel(text: Constants.moreTitleText)
 
     private lazy var tabBarActionView: UIView = {
         let view = UIView()
@@ -208,9 +152,21 @@ final class MoviesDescriptionViewController: UIViewController {
         return view
     }()
 
+    // MARK: - Init
+
+    init(detailViewModel: MovieDetailViewModelProtocol?) {
+        self.detailViewModel = detailViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     // MARK: - Private Property
 
-    private var networkManager = NetworkService()
+    private var detailViewModel: MovieDetailViewModelProtocol?
     private var casts: [Cast] = []
     private var genres = String()
 
@@ -229,87 +185,89 @@ final class MoviesDescriptionViewController: UIViewController {
     // MARK: Private Methods
 
     private func setupUI(data: Movie?) {
-        getAndSetupAnotherUI(data: data)
-        setupGenre(data)
-    }
-
-    private func getAndSetupAnotherUI(data: Movie?) {
         view.addSubview(moviePosterImageView)
         view.addSubview(contentScrollView)
-        guard let dataPosterImage = data?.posterPath,
-              let dataRating = data?.voteAverage,
-              let movieId = data?.id
-        else { return }
-        updateImage(dataPosterImage: dataPosterImage)
+        updateUI(from: data)
+        fetchGenre(data)
+    }
+
+    private func updateUI(from data: Movie?) {
+        fetchImage(dataPosterImage: data?.posterPath)
         movieNameLabel.text = data?.title
-        ratingLabel.text = String(dataRating)
+        updateRating(rating: data?.voteAverage)
         descriptionLabel.text = data?.overview
-        ratingLabel.textColor = updateRating(rating: dataRating)
-        fetchCast(id: "\(movieId)\(Constants.apiCreditsGenreURL)")
+        fetchCast(id: data?.id)
     }
 
-    private func fetchCast(id: String) {
-        networkManager.fetchCast(id: id) { result in
-            switch result {
-            case let .success(actor):
-                DispatchQueue.main.async {
-                    self.casts += actor.cast
-                    self.actorCollectionView.reloadData()
-                }
-            case let .failure(error):
-                print(error)
-            }
-        }
+    private func fetchCast(id: Int?) {
+        guard let id else { return }
+        detailViewModel?.fetchCast(id: "\(id)\(Constants.apiCreditsGenreURL)")
+        updateCast()
     }
 
-    private func updateRating(rating: Double) -> UIColor {
-        guard let rating = Double(ratingLabel.text ?? String()) else { return .lightGray }
-        switch rating {
-        case 5 ..< 7:
-            return .lightGray
-        case 7 ... 10:
-            return .green
-        default:
-            return .systemRed
-        }
-    }
-
-    private func updateImage(dataPosterImage: String) {
-        ImageNetworkService().fetchImageData(path: dataPosterImage) { result in
-            switch result {
-            case let .success(data):
-                DispatchQueue.main.async {
-                    self.moviePosterImageView.image = UIImage(data: data)
-                }
-            case let .failure(error):
-                print(error.localizedDescription)
-            }
-        }
-    }
-
-    private func setupGenre(_ data: Movie?) {
-        guard let id = data?.id else { return }
-        networkManager.fetchDetail(id: "\(id)") { result in
-            switch result {
-            case let .success(genre):
-                self.updateGenres(genres: genre.genres)
-            case let .failure(failure):
-                print(failure.localizedDescription)
-            }
-        }
-    }
-
-    private func updateGenres(genres: [Genre]) {
-        for genre in genres {
-            if self.genres.isEmpty {
-                self.genres += genre.name
-            } else {
-                self.genres += ", " + genre.name
-            }
+    private func updateCast() {
+        detailViewModel?.updateViewData = { cast in
             DispatchQueue.main.async {
-                self.genreLabel.text = self.genres
+                self.casts = cast
+                self.actorCollectionView.reloadData()
             }
         }
+    }
+
+    private func updateRating(rating: Double?) {
+        guard let rating else { return }
+        ratingLabel.text = "\(rating)"
+        detailViewModel?.updateColor(rating: rating)
+        updateRatingColor()
+    }
+
+    private func updateRatingColor() {
+        detailViewModel?.updateColor = { name in
+            self.ratingLabel.textColor = UIColor(named: name)
+        }
+    }
+
+    private func fetchImage(dataPosterImage: String?) {
+        guard let dataPosterImage else { return }
+        detailViewModel?.fetchImageData(path: dataPosterImage)
+        updateImage()
+    }
+
+    private func updateImage() {
+        detailViewModel?.updateImage = { data in
+            DispatchQueue.main.async {
+                self.moviePosterImageView.image = UIImage(data: data)
+            }
+        }
+    }
+
+    private func fetchGenre(_ data: Movie?) {
+        guard let id = data?.id else { return }
+        detailViewModel?.fetchDetail(id: "\(id)")
+        updateGenres()
+    }
+
+    private func updateGenres() {
+        detailViewModel?.updateGenre = { genre in
+            DispatchQueue.main.async {
+                self.genreLabel.text = genre
+            }
+        }
+    }
+
+    private func createMoreLabel(text: String) -> UILabel {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = text
+        label.font = .systemFont(ofSize: 11)
+        return label
+    }
+
+    private func createMoreButton(imageName: String) -> UIButton {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setBackgroundImage(UIImage(systemName: imageName), for: .normal)
+        return button
     }
 
     private func configureConstraint() {
@@ -345,7 +303,7 @@ final class MoviesDescriptionViewController: UIViewController {
 
 // MARK: - UICollectionViewDataSource, UICollectionViewDelegate
 
-extension MoviesDescriptionViewController: UICollectionViewDataSource, UICollectionViewDelegate {
+extension MovieDetailViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         casts.count
     }
@@ -358,9 +316,10 @@ extension MoviesDescriptionViewController: UICollectionViewDataSource, UICollect
             .dequeueReusableCell(
                 withReuseIdentifier: Constants.actorCellIdentifier,
                 for: indexPath
-            ) as? ActorCollectionViewCell
+            ) as? ActorCollectionViewCell,
+            let imageService = detailViewModel?.imageService
         else { return UICollectionViewCell() }
-        cell.setupActor(casts[indexPath.row])
+        cell.congigureCell(casts[indexPath.row], imageService: imageService)
         return cell
     }
 }

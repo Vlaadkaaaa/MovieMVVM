@@ -6,6 +6,7 @@ import UIKit
 /// SceneDelegate
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    var coordinator: MovieCoordinator?
 
     func scene(
         _ scene: UIScene,
@@ -13,11 +14,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options connectionOptions: UIScene.ConnectionOptions
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
-        let window = UIWindow(windowScene: windowScene)
-        let navController = UINavigationController(rootViewController: MovieViewController())
-        window.rootViewController = navController
-        self.window = window
-        window.backgroundColor = .systemBackground
-        window.makeKeyAndVisible()
+        window = UIWindow(windowScene: windowScene)
+        window?.backgroundColor = .systemBackground
+        window?.makeKeyAndVisible()
+        let bilder = Bilder()
+        let navController = UINavigationController()
+        coordinator = MovieCoordinator(navigationController: navController, bilder: bilder)
+        coordinator?.start()
     }
 }

@@ -66,8 +66,6 @@ final class MovieViewCell: UITableViewCell {
         return image
     }()
 
-    private let imageNetwork: ImageNetworkServiceProtocol = ImageNetworkService()
-
     // MARK: - Init
 
     override private init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -82,8 +80,8 @@ final class MovieViewCell: UITableViewCell {
 
     // MARK: Methods
 
-    func configureCell(movie: Movie) {
-        setupImage(movie: movie)
+    func configureCell(movie: Movie, imageService: ImageNetworkServiceProtocol) {
+        setupImage(movie: movie, imageService: imageService)
         setupLabel(movie: movie)
     }
 
@@ -99,8 +97,8 @@ final class MovieViewCell: UITableViewCell {
         configureConstraints()
     }
 
-    private func setupImage(movie: Movie) {
-        imageNetwork.fetchImageData(path: movie.posterPath) { [weak self] result in
+    private func setupImage(movie: Movie, imageService: ImageNetworkServiceProtocol) {
+        imageService.fetchImageData(path: movie.posterPath) { [weak self] result in
             guard let self else { return }
             switch result {
             case let .success(data):

@@ -32,7 +32,7 @@ final class NetworkService: NetworkServiceProtocol {
 
     // MARK: - Public Methods
 
-    func fetchMovies(category: String?, page: Int, completion: @escaping (Result<Movies, Error>) -> Void) {
+    func fetchMovies(category: MovieCategory?, page: Int, completion: @escaping (Result<Movies, Error>) -> Void) {
         fetchJson(id: nil, category: category, page: page, completion: completion)
     }
 
@@ -48,7 +48,7 @@ final class NetworkService: NetworkServiceProtocol {
 
     private func fetchJson<T: Decodable>(
         id: String?,
-        category: String?,
+        category: MovieCategory?,
         page: Int?,
         completion: @escaping ((Result<T, Error>) -> Void)
     ) {
@@ -66,13 +66,13 @@ final class NetworkService: NetworkServiceProtocol {
 
     private func configureUrlComponents(
         id: String?,
-        categoryOfMovies: String?,
+        categoryOfMovies: MovieCategory?,
         page: Int?
     ) -> URLComponents? {
         guard var urlComponents = URLComponents(
             string:
             UrlComponent
-                .movieBaseUrlText + (id ?? Constants.emptyText) + (categoryOfMovies ?? Constants.emptyText)
+                .movieBaseUrlText + (id ?? Constants.emptyText) + (categoryOfMovies?.rawValue ?? Constants.emptyText)
         )
         else { return URLComponents() }
         urlComponents.queryItems = [

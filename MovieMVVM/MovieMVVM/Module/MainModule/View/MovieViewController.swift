@@ -11,7 +11,6 @@ final class MovieViewController: UIViewController {
         static let segmentControlItems = ["Популярное", "Ожидаемые", "Лучшие"]
         static let movieTitleText = "Фильмы"
         static let movieCellIdentifier = "MovieCell"
-        static let genres = ["popular", "upcoming"]
     }
 
     // MARK: - Private Visual Component
@@ -30,11 +29,43 @@ final class MovieViewController: UIViewController {
         return table
     }()
 
+    private var activityIndicatorView = UIActivityIndicatorView(style: .large)
+
     // MARK: Private Property
 
     private var movies: [Movie] = []
-    private var networkManager = NetworkService()
-    private var genres = String()
+    private var movieViewModel: MovieViewModelProtocol?
+
+    private var props = MovieViewData.loading {
+        didSet {
+            switch props {
+            case .loading:
+                activityIndicatorView.startAnimating()
+            case let .success(movies):
+                DispatchQueue.main.async {
+                    self.activityIndicatorView.stopAnimating()
+                    self.movies = movies
+                    self.movieTableView.reloadData()
+                }
+            case let .failure(error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+
+    var toDetailViewControllerHandler: ((Movie) -> ())?
+
+    // MARK: - Init
+
+    init(movieViewModel: MovieViewModelProtocol?) {
+        self.movieViewModel = movieViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     // MARK: - Lyfe Cycle
 
@@ -50,9 +81,16 @@ final class MovieViewController: UIViewController {
         navigationController?.navigationBar.tintColor = .white
         title = Constants.movieTitleText
         view.addSubview(filtherMovieSegmentControl)
-        getMovies(genre: Constants.genres[0])
+        fetchMovie(genre: .popular)
         setupRefreshControl()
         setupMovieTableView()
+        updateViewData()
+    }
+
+    private func updateViewData() {
+        movieViewModel?.updateViewData = { viewData in
+            self.props = viewData
+        }
     }
 
     private func setupMovieTableView() {
@@ -69,18 +107,8 @@ final class MovieViewController: UIViewController {
         movieTableView.refreshControl = refresh
     }
 
-    private func getMovies(genre: String) {
-        networkManager.fetchMovies(category: genre, page: 1) { result in
-            switch result {
-            case let .success(data):
-                DispatchQueue.main.async {
-                    self.movies = data.movies
-                    self.movieTableView.reloadData()
-                }
-            case let .failure(error):
-                print(error.localizedDescription)
-            }
-        }
+    private func fetchMovie(genre: MovieCategory) {
+        movieViewModel?.fetchMovie(category: genre)
     }
 
     private func addContraint() {
@@ -105,9 +133,11 @@ final class MovieViewController: UIViewController {
     @objc private func changeSegmentAction(_ sender: UISegmentedControl) {
         switch sender.selectedSegmentIndex {
         case 0:
-            getMovies(genre: Constants.genres[0])
+            fetchMovie(genre: .popular)
+        case 1:
+            fetchMovie(genre: .upcoming)
         default:
-            getMovies(genre: Constants.genres[1])
+            fetchMovie(genre: .topRated)
         }
     }
 }
@@ -120,13 +150,15 @@ extension MovieViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
+        guard let cell = tableView.dequeueReusableCell(
             withIdentifier: Constants.movieCellIdentifier,
             for: indexPath
-        ) as? MovieViewCell
-        cell?.selectionStyle = .none
-        cell?.configureCell(movie: movies[indexPath.row])
-        return cell ?? UITableViewCell()
+        ) as? MovieViewCell,
+            let imageService = movieViewModel?.imageService
+        else { return UITableViewCell() }
+        cell.selectionStyle = .none
+        cell.configureCell(movie: movies[indexPath.row], imageService: imageService)
+        return cell
     }
 }
 
@@ -134,8 +166,6 @@ extension MovieViewController: UITableViewDataSource {
 
 extension MovieViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let vc = MoviesDescriptionViewController()
-        vc.data = movies[indexPath.row]
-        navigationController?.pushViewController(vc, animated: true)
+        toDetailViewControllerHandler?(movies[indexPath.row])
     }
 }
