@@ -37,7 +37,6 @@ final class MovieViewController: UIViewController {
 
     // MARK: Private Property
 
-    private var movies: [Movie] = []
     private var movieViewModel: MovieViewModelProtocol?
 
     private var props = MovieViewData.loading {
@@ -45,12 +44,9 @@ final class MovieViewController: UIViewController {
             switch props {
             case .loading:
                 activityIndicatorView.startAnimating()
-            case let .success(movies):
-                DispatchQueue.main.async {
-                    self.activityIndicatorView.stopAnimating()
-                    self.movies = movies
-                    self.movieTableView.reloadData()
-                }
+            case .success:
+                activityIndicatorView.stopAnimating()
+                movieTableView.reloadData()
             case let .failure(error):
                 showAlert(message: error.localizedDescription)
             }
@@ -86,10 +82,10 @@ final class MovieViewController: UIViewController {
         fetchMovie(genre: .popular)
         setupRefreshControl()
         setupMovieTableView()
-        updateViewData()
+        bind()
     }
 
-    private func updateViewData() {
+    private func bind() {
         movieViewModel?.updateViewDataHandler = { [weak self] viewData in
             guard let self else { return }
             self.props = viewData
@@ -111,7 +107,7 @@ final class MovieViewController: UIViewController {
     }
 
     private func fetchMovie(genre: MovieCategory) {
-        movieViewModel?.fetchMovie(category: genre)
+        movieViewModel?.fetchMovie()
     }
 
     private func addContraint() {
@@ -134,14 +130,7 @@ final class MovieViewController: UIViewController {
     }
 
     @objc private func changeSegmentAction(_ sender: UISegmentedControl) {
-        switch sender.selectedSegmentIndex {
-        case 0:
-            fetchMovie(genre: .popular)
-        case 1:
-            fetchMovie(genre: .upcoming)
-        default:
-            fetchMovie(genre: .topRated)
-        }
+        movieViewModel?.setupCategory(chose: sender.selectedSegmentIndex)
     }
 }
 
@@ -149,19 +138,26 @@ final class MovieViewController: UIViewController {
 
 extension MovieViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        movies.count
+        if case let .success(movies) = props {
+            return movies.count
+        }
+        return 0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: Constants.movieCellIdentifier,
-            for: indexPath
-        ) as? MovieViewCell,
-            let viewModel = movieViewModel
-        else { return UITableViewCell() }
-        cell.selectionStyle = .none
-        cell.configureCell(movie: movies[indexPath.row], viewModel: viewModel)
-        return cell
+        if case let .success(movies) = props {
+            guard let cell = tableView.dequeueReusableCell(
+                withIdentifier: Constants.movieCellIdentifier,
+                for: indexPath
+            ) as? MovieViewCell,
+                var viewModel = movieViewModel
+            else { return UITableViewCell() }
+            cell.selectionStyle = .none
+            viewModel.updateMovieCell(movies[indexPath.row])
+            cell.configureCell(viewModel: &viewModel)
+            return cell
+        }
+        return UITableViewCell()
     }
 }
 
@@ -169,6 +165,8 @@ extension MovieViewController: UITableViewDataSource {
 
 extension MovieViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        toDetailViewControllerHandler?(movies[indexPath.row])
+        if case let .success(movies) = props {
+            toDetailViewControllerHandler?(movies[indexPath.row])
+        }
     }
 }

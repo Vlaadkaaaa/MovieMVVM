@@ -17,11 +17,11 @@ final class MovieDetailViewModel: MovieDetailViewModelProtocol {
 
     // MARK: - Public Property
 
-    var updateViewDataHandler: (([Cast]) -> Void)?
-    var updateGenreHandler: ((String) -> Void)?
-    var updateImageHandler: ((Data) -> Void)?
-    var updateColorHandler: ((String) -> Void)?
-    var imageService: ImageServiceProtocol?
+    var updateViewDataHandler: CastsHandler?
+    var updateGenreHandler: StringHandler?
+    var updateImageHandler: DataHandler?
+    var updateColorHandler: StringHandler?
+    var castHandler: CastHandler?
 
     // MARK: - Init
 
@@ -33,6 +33,7 @@ final class MovieDetailViewModel: MovieDetailViewModelProtocol {
     // MARK: - Private Protperty
 
     private var networkService: NetworkServiceProtocol?
+    private var imageService: ImageServiceProtocol?
 
     // MARK: - Public Method
 
@@ -73,6 +74,13 @@ final class MovieDetailViewModel: MovieDetailViewModelProtocol {
         }
     }
 
+    func updateCast(_ cast: Cast) {
+        guard let character = cast.character,
+              let path = cast.profilePath
+        else { return }
+        castHandler?(cast.name, character, fetchImageCast(path: path))
+    }
+
     func updateColor(rating: Double) {
         switch rating {
         case 5 ..< 7:
@@ -102,5 +110,18 @@ final class MovieDetailViewModel: MovieDetailViewModelProtocol {
             }
             updateGenreHandler?(genresEmpty)
         }
+    }
+
+    private func fetchImageCast(path: String) -> Data {
+        var data: Data?
+        imageService?.loadImage(path: path) { result in
+            switch result {
+            case let .success(castData):
+                data = castData
+            case let .failure(error):
+                print(error.localizedDescription)
+            }
+        }
+        return data ?? Data()
     }
 }

@@ -44,6 +44,7 @@
 		CE16C3062992BA980095F137 /* UIVIewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16C3052992BA980095F137 /* UIVIewController+Extension.swift */; };
 		CE16C30B2992C6FA0095F137 /* BaseCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16C30A2992C6FA0095F137 /* BaseCoordinator.swift */; };
 		CE16C30D2992C71F0095F137 /* ApplicationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16C30C2992C71F0095F137 /* ApplicationCoordinator.swift */; };
+		CE16C36E2993A5130095F137 /* Handlers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16C36D2993A5130095F137 /* Handlers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,6 +87,7 @@
 		CE16C3052992BA980095F137 /* UIVIewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIVIewController+Extension.swift"; sourceTree = "<group>"; };
 		CE16C30A2992C6FA0095F137 /* BaseCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCoordinator.swift; sourceTree = "<group>"; };
 		CE16C30C2992C71F0095F137 /* ApplicationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationCoordinator.swift; sourceTree = "<group>"; };
+		CE16C36D2993A5130095F137 /* Handlers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handlers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -235,6 +237,7 @@
 				CE16C28D299163FC0095F137 /* MovieCategory.swift */,
 				CE16C29029916BA10095F137 /* Bilder.swift */,
 				CE16C3032992B8680095F137 /* BilderProtocol.swift */,
+				CE16C36D2993A5130095F137 /* Handlers.swift */,
 			);
 			name = Helpers;
 			path = Core;
@@ -434,7 +437,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
-			showEnvVarsInLog = 0;
 		};
 		55B2AAA92906A021009F0BD7 /* SwiftFormater */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -468,6 +470,7 @@
 				55076235290A5F19002BBFDD /* ActorCollectionViewCell.swift in Sources */,
 				550762312909A2FD002BBFDD /* MovieDetail.swift in Sources */,
 				55643E952907BB1E0058B3A8 /* NetworkService.swift in Sources */,
+				CE16C36E2993A5130095F137 /* Handlers.swift in Sources */,
 				CE16C2D629924BD80095F137 /* FileManagerProtocol.swift in Sources */,
 				55643E872906A57F0058B3A8 /* MovieViewController.swift in Sources */,
 				55643E932907B6AC0058B3A8 /* Movies.swift in Sources */,

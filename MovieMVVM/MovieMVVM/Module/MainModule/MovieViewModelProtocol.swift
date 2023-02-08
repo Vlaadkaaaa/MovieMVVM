@@ -5,7 +5,9 @@ import Foundation
 
 /// Протокол для ViewModel экрана списка фильмов
 protocol MovieViewModelProtocol {
-    var imageService: ImageServiceProtocol? { get set }
-    var updateViewDataHandler: ((MovieViewData) -> Void)? { get set }
-    func fetchMovie(category: MovieCategory?)
+    var updateViewDataHandler: MovieDataHandler? { get set }
+    var updateMovieCellHandler: MovieDataStringHandler? { get set }
+    func fetchMovie()
+    func updateMovieCell(_ movie: Movie)
+    func setupCategory(chose index: Int)
 }

@@ -80,9 +80,12 @@ final class MovieViewCell: UITableViewCell {
 
     // MARK: Methods
 
-    func configureCell(movie: Movie, viewModel: MovieViewModelProtocol) {
-        setupImage(movie: movie, viewModel: viewModel)
-        setupLabel(movie: movie)
+    func configureCell(viewModel: inout MovieViewModelProtocol) {
+        viewModel.updateMovieCellHandler = { [weak self] movie, data, stars in
+            guard let self else { return }
+            self.setupImage(data: data, stars: stars)
+            self.setupLabel(movie: movie)
+        }
     }
 
     // MARK: Private Methods
@@ -97,29 +100,10 @@ final class MovieViewCell: UITableViewCell {
         configureConstraints()
     }
 
-    private func setupImage(movie: Movie, viewModel: MovieViewModelProtocol) {
-        viewModel.imageService?.loadImage(path: movie.posterPath) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case let .success(data):
-                DispatchQueue.main.async {
-                    self.moviePosterImageView.image = UIImage(data: data)
-                }
-            case let .failure(error):
-                print(error.localizedDescription)
-            }
-        }
-        movieRatingImageView.image = UIImage(named: updateRating(voteAverage: movie.voteAverage))
-    }
-
-    private func updateRating(voteAverage: Double) -> String {
-        switch voteAverage {
-        case 0 ... 2: return Constants.oneStarImageName
-        case 2 ... 4: return Constants.twoStarImageName
-        case 4 ... 6: return Constants.threeStarImageName
-        case 6 ... 8: return Constants.fourStarImageName
-        case 8 ... 10: return Constants.fiveStarImageName
-        default: return Constants.oneStarImageName
+    private func setupImage(data: Data, stars: String) {
+        DispatchQueue.main.async {
+            self.moviePosterImageView.image = UIImage(data: data)
+            self.movieRatingImageView.image = UIImage(named: stars)
         }
     }
 

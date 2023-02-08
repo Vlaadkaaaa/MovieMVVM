@@ -53,18 +53,13 @@ final class ActorCollectionViewCell: UICollectionViewCell {
 
     // MARK: - Public Metods
 
-    func congigureCell(_ actror: Cast, viewModel: MovieDetailViewModelProtocol) {
-        actorNameLabel.text = actror.name
-        actorRoleLabel.text = actror.character
-        guard let path = actror.profilePath else { return }
-        viewModel.imageService?.loadImage(path: path) { result in
-            switch result {
-            case let .success(data):
-                DispatchQueue.main.async {
-                    self.actorImageView.image = UIImage(data: data)
-                }
-            case let .failure(error):
-                print(error)
+    func congigureCell(viewModel: inout MovieDetailViewModelProtocol) {
+        viewModel.castHandler = { [weak self] name, character, data in
+            guard let self else { return }
+            self.actorNameLabel.text = name
+            self.actorRoleLabel.text = character
+            DispatchQueue.main.async {
+                self.actorImageView.image = UIImage(data: data)
             }
         }
     }

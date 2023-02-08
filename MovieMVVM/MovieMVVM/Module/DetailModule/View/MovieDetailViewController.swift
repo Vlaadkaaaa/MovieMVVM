@@ -419,9 +419,10 @@ extension MovieDetailViewController: UICollectionViewDataSource {
                 withReuseIdentifier: Constants.actorCellIdentifier,
                 for: indexPath
             ) as? ActorCollectionViewCell,
-            let viewModel = detailViewModel
+            var viewModel = detailViewModel
         else { return UICollectionViewCell() }
-        cell.congigureCell(casts[indexPath.row], viewModel: viewModel)
+        viewModel.updateCast(casts[indexPath.row])
+        cell.congigureCell(viewModel: &viewModel)
         return cell
     }
 }
