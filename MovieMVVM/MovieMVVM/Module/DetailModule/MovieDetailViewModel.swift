@@ -5,12 +5,22 @@ import Foundation
 
 /// ViewModel для экрана с деталями о фильме
 final class MovieDetailViewModel: MovieDetailViewModelProtocol {
+    // MARK: - Private Constants
+
+    private enum Constants {
+        static let lightGrayColorName = "lightGray"
+        static let greenColorName = "green"
+        static let redColorName = "red"
+        static let emptyText = ""
+        static let divideText = ", "
+    }
+
     // MARK: - Public Property
 
-    var updateViewData: (([Cast]) -> Void)?
-    var updateGenre: ((String) -> Void)?
-    var updateImage: ((Data) -> Void)?
-    var updateColor: ((String) -> Void)?
+    var updateViewDataHandler: (([Cast]) -> Void)?
+    var updateGenreHandler: ((String) -> Void)?
+    var updateImageHandler: ((Data) -> Void)?
+    var updateColorHandler: ((String) -> Void)?
     var imageService: ImageServiceProtocol?
 
     // MARK: - Init
@@ -27,10 +37,11 @@ final class MovieDetailViewModel: MovieDetailViewModelProtocol {
     // MARK: - Public Method
 
     func fetchCast(id: String) {
-        networkService?.fetchCast(id: id) { result in
+        networkService?.fetchCast(id: id) { [weak self] result in
+            guard let self else { return }
             switch result {
             case let .success(cast):
-                self.updateViewData?(cast.cast)
+                self.updateViewDataHandler?(cast.cast)
             case let .failure(error):
                 print(error)
             }
@@ -49,11 +60,12 @@ final class MovieDetailViewModel: MovieDetailViewModelProtocol {
     }
 
     func fetchImageData(path: String) {
-        imageService?.loadImage(path: path) { result in
+        imageService?.loadImage(path: path) { [weak self] result in
+            guard let self else { return }
             switch result {
             case let .success(data):
                 DispatchQueue.main.async {
-                    self.updateImage?(data)
+                    self.updateImageHandler?(data)
                 }
             case let .failure(error):
                 print(error)
@@ -65,15 +77,15 @@ final class MovieDetailViewModel: MovieDetailViewModelProtocol {
         switch rating {
         case 5 ..< 7:
             DispatchQueue.main.async {
-                self.updateColor?("lightGray")
+                self.updateColorHandler?(Constants.lightGrayColorName)
             }
         case 7 ... 10:
             DispatchQueue.main.async {
-                self.updateColor?("green")
+                self.updateColorHandler?(Constants.greenColorName)
             }
         default:
             DispatchQueue.main.async {
-                self.updateColor?("red")
+                self.updateColorHandler?(Constants.redColorName)
             }
         }
     }
@@ -81,14 +93,14 @@ final class MovieDetailViewModel: MovieDetailViewModelProtocol {
     // MARK: - Private Method
 
     private func updateGenre(genres: [Genre]) {
-        var genresEmpty = ""
+        var genresEmpty = Constants.emptyText
         for genre in genres {
             if genresEmpty.isEmpty {
                 genresEmpty += genre.name
             } else {
-                genresEmpty += ", " + genre.name
+                genresEmpty += Constants.divideText + genre.name
             }
-            updateGenre?(genresEmpty)
+            updateGenreHandler?(genresEmpty)
         }
     }
 }

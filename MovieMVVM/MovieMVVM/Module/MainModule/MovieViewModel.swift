@@ -5,10 +5,13 @@ import Foundation
 
 /// ViewModel для главного экрана
 final class MovieViewModel: MovieViewModelProtocol {
+    
     // MARK: - Public Property
 
-    var updateViewData: ((MovieViewData) -> Void)?
+    var updateViewDataHandler: ((MovieViewData) -> Void)?
     var imageService: ImageServiceProtocol?
+
+    // MARK: - Init
 
     init(networkService: NetworkServiceProtocol, imageService: ImageServiceProtocol?) {
         self.networkService = networkService
@@ -26,9 +29,9 @@ final class MovieViewModel: MovieViewModelProtocol {
             guard let self else { return }
             switch result {
             case let .success(movies):
-                self.updateViewData?(.success(movies.movies))
+                self.updateViewDataHandler?(.success(movies.movies))
             case let .failure(error):
-                self.updateViewData?(.failure(error: error))
+                self.updateViewDataHandler?(.failure(error: error))
             }
         }
     }

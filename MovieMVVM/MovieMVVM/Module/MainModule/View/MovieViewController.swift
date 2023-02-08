@@ -31,6 +31,11 @@ final class MovieViewController: UIViewController {
 
     private var activityIndicatorView = UIActivityIndicatorView(style: .large)
 
+    
+    // MARK: - Public Property
+    
+    var toDetailViewControllerHandler: ((Movie) -> ())?
+    
     // MARK: Private Property
 
     private var movies: [Movie] = []
@@ -52,8 +57,6 @@ final class MovieViewController: UIViewController {
             }
         }
     }
-
-    var toDetailViewControllerHandler: ((Movie) -> ())?
 
     // MARK: - Init
 
@@ -88,7 +91,8 @@ final class MovieViewController: UIViewController {
     }
 
     private func updateViewData() {
-        movieViewModel?.updateViewData = { viewData in
+        movieViewModel?.updateViewDataHandler = { [weak self] viewData in
+            guard let self else { return }
             self.props = viewData
         }
     }

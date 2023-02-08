@@ -18,6 +18,9 @@ final class MovieDetailViewController: UIViewController {
         static let bookmarkSystemImageName = "bookmark.fill"
         static let shareSystemImageName = "square.and.arrow.up.fill"
         static let moreSystemImageName = "ellipsis"
+        static let playSystemImageName = "play.fill"
+        static let squareSystemImageName = "square.and.arrow.down"
+        static let watchTitlteText = "Смотреть"
         static let favoriteTitleText = "Оценить"
         static let bookmarkTitleText = "Буду смотреть"
         static let shareTitleText = "Поделиться"
@@ -85,10 +88,10 @@ final class MovieDetailViewController: UIViewController {
     private lazy var seeMovieButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        button.setImage(UIImage(systemName: Constants.playSystemImageName), for: .normal)
         button.imageView?.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
         button.imageEdgeInsets.right = 30
-        button.setTitle("Смотреть", for: .normal)
+        button.setTitle(Constants.watchTitlteText, for: .normal)
         button.applyGradient(colors: [UIColor.orange.cgColor, UIColor.yellow.cgColor])
         return button
     }()
@@ -96,7 +99,7 @@ final class MovieDetailViewController: UIViewController {
     private var downloadMovieButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setBackgroundImage(UIImage(systemName: "square.and.arrow.down"), for: .normal)
+        button.setBackgroundImage(UIImage(systemName: Constants.squareSystemImageName), for: .normal)
         button.tintColor = .gray
         return button
     }()
@@ -235,7 +238,7 @@ final class MovieDetailViewController: UIViewController {
     }
 
     private func updateCast() {
-        detailViewModel?.updateViewData = { cast in
+        detailViewModel?.updateViewDataHandler = { cast in
             DispatchQueue.main.async {
                 self.casts = cast
                 self.actorCollectionView.reloadData()
@@ -251,7 +254,7 @@ final class MovieDetailViewController: UIViewController {
     }
 
     private func updateRatingColor() {
-        detailViewModel?.updateColor = { name in
+        detailViewModel?.updateColorHandler = { name in
             self.ratingLabel.textColor = UIColor(named: name)
         }
     }
@@ -262,7 +265,7 @@ final class MovieDetailViewController: UIViewController {
     }
 
     private func updateImage() {
-        detailViewModel?.updateImage = { data in
+        detailViewModel?.updateImageHandler = { data in
             DispatchQueue.main.async {
                 self.moviePosterImageView.image = UIImage(data: data)
             }
@@ -276,7 +279,7 @@ final class MovieDetailViewController: UIViewController {
     }
 
     private func updateGenres() {
-        detailViewModel?.updateGenre = { genre in
+        detailViewModel?.updateGenreHandler = { genre in
             DispatchQueue.main.async {
                 self.genreLabel.text = genre
             }
@@ -330,7 +333,7 @@ final class MovieDetailViewController: UIViewController {
         hStackView.heightAnchor.constraint(equalToConstant: 50).isActive = true
     }
 
-    private func configureConstraint() {
+    private func configureHeaderConstraint() {
         NSLayoutConstraint.activate([
             movieNameLabel.topAnchor.constraint(equalTo: backgroundBlackView.topAnchor, constant: 25),
             movieNameLabel.widthAnchor.constraint(equalToConstant: backgroundBlackView.frame.width - 100),
@@ -338,7 +341,24 @@ final class MovieDetailViewController: UIViewController {
             ratingLabel.topAnchor.constraint(equalTo: movieNameLabel.bottomAnchor, constant: 15),
             ratingLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
             genreLabel.topAnchor.constraint(equalTo: ratingLabel.bottomAnchor, constant: 5),
-            genreLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
+            genreLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0)
+        ])
+    }
+
+    private func configureCastConstraint() {
+        NSLayoutConstraint.activate([
+            actorsLabel.topAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: 63),
+            actorsLabel.leadingAnchor.constraint(equalTo: backgroundBlackView.leadingAnchor, constant: 20),
+            actorCollectionView.topAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: 93),
+            actorCollectionView.leadingAnchor.constraint(equalTo: backgroundBlackView.leadingAnchor, constant: 0),
+            actorCollectionView.trailingAnchor.constraint(equalTo: backgroundBlackView.trailingAnchor, constant: 0),
+            actorCollectionView.heightAnchor.constraint(equalToConstant: 250),
+            actorCollectionView.widthAnchor.constraint(equalToConstant: backgroundBlackView.frame.width)
+        ])
+    }
+
+    private func configureMoreBlockConstraint() {
+        NSLayoutConstraint.activate([
             seeMovieButton.topAnchor.constraint(equalTo: genreLabel.bottomAnchor, constant: 10),
             seeMovieButton.leadingAnchor.constraint(equalTo: backgroundBlackView.leadingAnchor, constant: 60),
             seeMovieButton.heightAnchor.constraint(equalToConstant: 70),
@@ -349,19 +369,37 @@ final class MovieDetailViewController: UIViewController {
             downloadMovieButton.widthAnchor.constraint(equalToConstant: 25),
             tabBarActionView.topAnchor.constraint(equalTo: seeMovieButton.bottomAnchor, constant: 30),
             tabBarActionView.centerXAnchor.constraint(equalTo: backgroundBlackView.centerXAnchor),
-            actorsLabel.topAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: 63),
-            actorsLabel.leadingAnchor.constraint(equalTo: backgroundBlackView.leadingAnchor, constant: 20),
-            actorCollectionView.topAnchor.constraint(equalTo: tabBarActionView.bottomAnchor, constant: 93),
-            actorCollectionView.leadingAnchor.constraint(equalTo: backgroundBlackView.leadingAnchor, constant: 0),
-            actorCollectionView.trailingAnchor.constraint(equalTo: backgroundBlackView.trailingAnchor, constant: 0),
-            actorCollectionView.heightAnchor.constraint(equalToConstant: 250),
-            actorCollectionView.widthAnchor.constraint(equalToConstant: backgroundBlackView.frame.width),
+        ])
+    }
+
+    private func configureFooterBlockConstraint() {
+        NSLayoutConstraint.activate([
             descriptionTitleLabel.topAnchor.constraint(equalTo: actorCollectionView.bottomAnchor, constant: 15),
             descriptionTitleLabel.leadingAnchor.constraint(equalTo: backgroundBlackView.leadingAnchor, constant: 20),
             descriptionLabel.topAnchor.constraint(equalTo: descriptionTitleLabel.bottomAnchor, constant: 10),
             descriptionLabel.leadingAnchor.constraint(equalTo: backgroundBlackView.leadingAnchor, constant: 20),
             descriptionLabel.widthAnchor.constraint(equalToConstant: 360)
         ])
+    }
+
+    private func configureRatingConstraint() {
+        NSLayoutConstraint.activate([
+            movieNameLabel.topAnchor.constraint(equalTo: backgroundBlackView.topAnchor, constant: 25),
+            movieNameLabel.widthAnchor.constraint(equalToConstant: backgroundBlackView.frame.width - 100),
+            movieNameLabel.centerXAnchor.constraint(equalTo: backgroundBlackView.centerXAnchor, constant: 0),
+            ratingLabel.topAnchor.constraint(equalTo: movieNameLabel.bottomAnchor, constant: 15),
+            ratingLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
+            genreLabel.topAnchor.constraint(equalTo: ratingLabel.bottomAnchor, constant: 5),
+            genreLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
+        ])
+    }
+
+    private func configureConstraint() {
+        configureHeaderConstraint()
+        configureRatingConstraint()
+        configureMoreBlockConstraint()
+        configureCastConstraint()
+        configureFooterBlockConstraint()
     }
 }
 
