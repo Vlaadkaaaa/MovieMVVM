@@ -80,8 +80,8 @@ final class MovieViewCell: UITableViewCell {
 
     // MARK: Methods
 
-    func configureCell(movie: Movie, imageService: ImageServiceProtocol) {
-        setupImage(movie: movie, imageService: imageService)
+    func configureCell(movie: Movie, viewModel: MovieViewModelProtocol) {
+        setupImage(movie: movie, viewModel: viewModel)
         setupLabel(movie: movie)
     }
 
@@ -97,8 +97,8 @@ final class MovieViewCell: UITableViewCell {
         configureConstraints()
     }
 
-    private func setupImage(movie: Movie, imageService: ImageServiceProtocol) {
-        imageService.loadImage(path: movie.posterPath) { [weak self] result in
+    private func setupImage(movie: Movie, viewModel: MovieViewModelProtocol) {
+        viewModel.imageService?.loadImage(path: movie.posterPath) { [weak self] result in
             guard let self else { return }
             switch result {
             case let .success(data):

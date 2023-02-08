@@ -53,11 +53,11 @@ final class ActorCollectionViewCell: UICollectionViewCell {
 
     // MARK: - Public Metods
 
-    func congigureCell(_ actror: Cast, imageService: ImageServiceProtocol) {
+    func congigureCell(_ actror: Cast, viewModel: MovieDetailViewModelProtocol) {
         actorNameLabel.text = actror.name
         actorRoleLabel.text = actror.character
         guard let path = actror.profilePath else { return }
-        imageService.loadImage(path: path) { result in
+        viewModel.imageService?.loadImage(path: path) { result in
             switch result {
             case let .success(data):
                 DispatchQueue.main.async {

@@ -5,7 +5,6 @@ import Foundation
 
 /// ViewModel для главного экрана
 final class MovieViewModel: MovieViewModelProtocol {
-    
     // MARK: - Public Property
 
     var updateViewDataHandler: ((MovieViewData) -> Void)?

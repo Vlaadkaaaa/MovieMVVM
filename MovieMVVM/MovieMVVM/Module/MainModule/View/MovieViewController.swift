@@ -31,11 +31,10 @@ final class MovieViewController: UIViewController {
 
     private var activityIndicatorView = UIActivityIndicatorView(style: .large)
 
-    
     // MARK: - Public Property
-    
+
     var toDetailViewControllerHandler: ((Movie) -> ())?
-    
+
     // MARK: Private Property
 
     private var movies: [Movie] = []
@@ -158,10 +157,10 @@ extension MovieViewController: UITableViewDataSource {
             withIdentifier: Constants.movieCellIdentifier,
             for: indexPath
         ) as? MovieViewCell,
-            let imageService = movieViewModel?.imageService
+            let viewModel = movieViewModel
         else { return UITableViewCell() }
         cell.selectionStyle = .none
-        cell.configureCell(movie: movies[indexPath.row], imageService: imageService)
+        cell.configureCell(movie: movies[indexPath.row], viewModel: viewModel)
         return cell
     }
 }
