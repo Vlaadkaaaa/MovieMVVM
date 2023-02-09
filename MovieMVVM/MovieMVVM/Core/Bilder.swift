@@ -12,7 +12,14 @@ final class Bilder: BilderProtocol {
     func createMainModule() -> UIViewController {
         let proxy = Proxy(imageService: imageAPIService, fileManagerService: fileManager)
         let imageService = ImageService(proxy: proxy)
-        let viewModel = MovieViewModel(networkService: networkService, imageService: imageService)
+        let coreDataService = CoreDataService()
+        let keychainService = KeychainService()
+        let viewModel = MovieViewModel(
+            networkService: networkService,
+            imageService: imageService,
+            coreDataService: coreDataService,
+            keychainService: keychainService
+        )
         let view = MovieViewController(movieViewModel: viewModel)
         return view
     }

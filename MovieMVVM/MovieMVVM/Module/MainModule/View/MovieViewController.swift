@@ -38,15 +38,16 @@ final class MovieViewController: UIViewController {
     // MARK: Private Property
 
     private var movieViewModel: MovieViewModelProtocol?
-
     private var props = MovieViewData.loading {
         didSet {
             switch props {
             case .loading:
                 activityIndicatorView.startAnimating()
             case .success:
-                activityIndicatorView.stopAnimating()
-                movieTableView.reloadData()
+                DispatchQueue.main.async {
+                    self.activityIndicatorView.stopAnimating()
+                    self.movieTableView.reloadData()
+                }
             case let .failure(error):
                 showAlert(message: error.localizedDescription)
             }
@@ -79,16 +80,25 @@ final class MovieViewController: UIViewController {
         navigationController?.navigationBar.tintColor = .white
         title = Constants.movieTitleText
         view.addSubview(filtherMovieSegmentControl)
-        fetchMovie(genre: .popular)
-        setupRefreshControl()
-        setupMovieTableView()
         bind()
+        setupMovieTableView()
+        checkApiKey()
+        setupRefreshControl()
     }
 
     private func bind() {
         movieViewModel?.updateViewDataHandler = { [weak self] viewData in
             guard let self else { return }
             self.props = viewData
+        }
+    }
+
+    private func checkApiKey() {
+        movieViewModel?.checkApiKey {
+            saveKeyAlert { [weak self] key in
+                guard let self else { return }
+                self.movieViewModel?.updateApiKey(key)
+            }
         }
     }
 
@@ -104,10 +114,6 @@ final class MovieViewController: UIViewController {
         let refresh = UIRefreshControl()
         refresh.addTarget(self, action: #selector(refreshPageAction), for: .valueChanged)
         movieTableView.refreshControl = refresh
-    }
-
-    private func fetchMovie(genre: MovieCategory) {
-        movieViewModel?.fetchMovie()
     }
 
     private func addContraint() {
@@ -153,8 +159,8 @@ extension MovieViewController: UITableViewDataSource {
                 var viewModel = movieViewModel
             else { return UITableViewCell() }
             cell.selectionStyle = .none
-            viewModel.updateMovieCell(movies[indexPath.row])
             cell.configureCell(viewModel: &viewModel)
+            viewModel.updateMovieCell(movies[indexPath.row])
             return cell
         }
         return UITableViewCell()
