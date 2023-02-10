@@ -25,9 +25,15 @@ final class NetworkService: NetworkServiceProtocol {
         static let emptyText = ""
     }
 
+    // MARK: - Init
+
+    init(keychainService: KeychainServiceProtocol?) {
+        self.keychainService = keychainService
+    }
+
     // MARK: - Private Property
 
-    private let keychainService = KeychainService()
+    private let keychainService: KeychainServiceProtocol?
     private let session = URLSession.shared
     private let decoder = JSONDecoder()
 
@@ -77,7 +83,7 @@ final class NetworkService: NetworkServiceProtocol {
         )
         else { return URLComponents() }
         urlComponents.queryItems = [
-            URLQueryItem(name: QueryItems.apiKeyQueryText, value: keychainService.fetchKey(name: Constants.apiKey)),
+            URLQueryItem(name: QueryItems.apiKeyQueryText, value: keychainService?.fetchKey(name: Constants.apiKey)),
             URLQueryItem(name: QueryItems.languageQueryText, value: UrlComponent.languageValueText),
             URLQueryItem(name: QueryItems.regionQueryText, value: UrlComponent.regionValueText)
         ]

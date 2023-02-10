@@ -6,22 +6,13 @@ import UIKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Bool {
-        true
+    // MARK: - Private Constants
+
+    private enum Constants {
+        static let persistentContainerName = "MovieMVVM"
     }
 
-    // MARK: UISceneSession Lifecycle
-
-    func application(
-        _ application: UIApplication,
-        configurationForConnecting connectingSceneSession: UISceneSession,
-        options: UIScene.ConnectionOptions
-    ) -> UISceneConfiguration {
-        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-    }
+    // MARK: - Public Property
 
     static let sharedAppDelegate: AppDelegate = {
         guard let delegate = UIApplication.shared.delegate as? AppDelegate else {
@@ -30,16 +21,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return delegate
     }()
 
-    // MARK: - Core Data stack
-
     lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "MovieMVVM")
+        let container = NSPersistentContainer(name: Constants.persistentContainerName)
         container.loadPersistentStores { _, _ in
         }
         return container
     }()
 
-    // MARK: - Core Data Saving support
+    // MARK: - Public Method
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        true
+    }
 
     func saveContext() {
         let context = persistentContainer.viewContext

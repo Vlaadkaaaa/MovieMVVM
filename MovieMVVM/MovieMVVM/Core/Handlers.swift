@@ -3,7 +3,7 @@
 
 import Foundation
 
-/// Псевлонимы типов
+/// Псевдонимы типов
 typealias CastsHandler = ([Cast]) -> Void
 typealias MovieDataHandler = (MovieViewData) -> Void
 typealias MovieDataStringHandler = (Movie, Data, String) -> Void

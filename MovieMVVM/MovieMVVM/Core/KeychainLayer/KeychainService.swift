@@ -2,6 +2,7 @@
 // Copyright © Vlaadkaaaa. All rights reserved.
 
 import KeychainSwift
+
 /// Менеджер работы с критическими данными
 final class KeychainService: KeychainServiceProtocol {
     // MARK: - Private Constants

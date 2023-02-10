@@ -5,7 +5,6 @@ import UIKit
 
 /// Сборщик модулей
 final class Bilder: BilderProtocol {
-    let networkService = NetworkService()
     let imageAPIService = ImageAPIService()
     let fileManager = FileManagerService()
 
@@ -14,6 +13,7 @@ final class Bilder: BilderProtocol {
         let imageService = ImageService(proxy: proxy)
         let coreDataService = CoreDataService()
         let keychainService = KeychainService()
+        let networkService = NetworkService(keychainService: keychainService)
         let viewModel = MovieViewModel(
             networkService: networkService,
             imageService: imageService,
@@ -27,6 +27,8 @@ final class Bilder: BilderProtocol {
     func createDetailModule(movie: Movie) -> UIViewController {
         let proxy = Proxy(imageService: imageAPIService, fileManagerService: fileManager)
         let imageService = ImageService(proxy: proxy)
+        let keychainService = KeychainService()
+        let networkService = NetworkService(keychainService: keychainService)
         let viewModel = MovieDetailViewModel(networkService: networkService, imageService: imageService)
         let view = MovieDetailViewController(detailViewModel: viewModel)
         view.data = movie
