@@ -56,7 +56,7 @@ final class CoreDataService: CoreDataServiceProtocol {
         request.predicate = predicate
         do {
             try context.fetch(request).forEach {
-                movies.append(contertMovie(object: $0))
+                movies.append(convertMovie(object: $0))
             }
             return movies
         } catch {
@@ -64,7 +64,7 @@ final class CoreDataService: CoreDataServiceProtocol {
         }
     }
 
-    private func contertMovie(object: MovieStorage) -> Movie {
+    private func convertMovie(object: MovieStorage) -> Movie {
         Movie(
             id: Int(object.id),
             overview: object.overview ?? Constants.emptyText,
