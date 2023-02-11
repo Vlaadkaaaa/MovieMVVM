@@ -13,6 +13,7 @@ final class MovieViewModel: MovieViewModelProtocol {
         static let threeStarImageName = "threeStar"
         static let fourStarImageName = "fourStar"
         static let fiveStarImageName = "fiveStar"
+        static let apiKeyText = "apiKey"
     }
 
     // MARK: - Public Property
@@ -22,33 +23,44 @@ final class MovieViewModel: MovieViewModelProtocol {
 
     // MARK: - Init
 
-    init(networkService: NetworkServiceProtocol, imageService: ImageServiceProtocol?) {
+    init(
+        networkService: NetworkServiceProtocol,
+        imageService: ImageServiceProtocol?,
+        coreDataService: CoreDataServiceProtocol?,
+        keychainService: KeychainServiceProtocol?
+    ) {
         self.networkService = networkService
         self.imageService = imageService
+        self.coreDataService = coreDataService
+        self.keychainService = keychainService
     }
 
     // MARK: - Private Protperty
 
-    private var imageService: ImageServiceProtocol?
+    private let imageService: ImageServiceProtocol?
+    private let keychainService: KeychainServiceProtocol?
     private let networkService: NetworkServiceProtocol?
+    private var coreDataService: CoreDataServiceProtocol?
     private var currentCategory: MovieCategory = .popular
 
     // MARK: - Public Method
 
-    func fetchMovie() {
-        networkService?.fetchMovies(category: currentCategory, page: 1) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case let .success(movies):
-                self.updateViewDataHandler?(.success(movies.movies))
-            case let .failure(error):
-                self.updateViewDataHandler?(.failure(error: error))
-            }
-        }
-    }
-
     func updateMovieCell(_ movie: Movie) {
         updateMovieCellHandler?(movie, fetchMovieImage(path: movie.posterPath), fetchRating(number: movie.voteAverage))
+    }
+
+    func updateApiKey(_ key: String) {
+        UserDefaults.standard.set(true, forKey: Constants.apiKeyText)
+        keychainService?.saveKey(name: key)
+        loadMovie()
+    }
+
+    func checkApiKey(completion: VoidHandler) {
+        if UserDefaults.standard.bool(forKey: Constants.apiKeyText) {
+            loadMovie()
+        } else {
+            completion()
+        }
     }
 
     func setupCategory(chose index: Int) {
@@ -76,6 +88,29 @@ final class MovieViewModel: MovieViewModelProtocol {
             }
         }
         return data ?? Data()
+    }
+
+    private func fetchMovie() {
+        updateViewDataHandler?(.loading)
+        loadMovie()
+    }
+
+    private func loadMovie() {
+        if let data = coreDataService?.getData(category: currentCategory.rawValue), !data.isEmpty {
+            updateViewDataHandler?(.success(data))
+            return
+        }
+        networkService?.fetchMovies(category: currentCategory, page: 1) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case let .success(movies):
+                self.coreDataService?.saveData(movies.movies, category: self.currentCategory.rawValue)
+                guard let movie = self.coreDataService?.getData(category: self.currentCategory.rawValue) else { return }
+                self.updateViewDataHandler?(.success(movie))
+            case let .failure(error):
+                self.updateViewDataHandler?(.failure(error: error))
+            }
+        }
     }
 
     private func fetchRating(number: Double) -> String {

@@ -21,12 +21,19 @@ final class NetworkService: NetworkServiceProtocol {
     }
 
     private enum Constants {
-        static let apiKey = "d9e4494907230d135d6f6fd47beca82e"
+        static let apiKey = "apiKey"
         static let emptyText = ""
+    }
+
+    // MARK: - Init
+
+    init(keychainService: KeychainServiceProtocol?) {
+        self.keychainService = keychainService
     }
 
     // MARK: - Private Property
 
+    private let keychainService: KeychainServiceProtocol?
     private let session = URLSession.shared
     private let decoder = JSONDecoder()
 
@@ -76,7 +83,7 @@ final class NetworkService: NetworkServiceProtocol {
         )
         else { return URLComponents() }
         urlComponents.queryItems = [
-            URLQueryItem(name: QueryItems.apiKeyQueryText, value: Constants.apiKey),
+            URLQueryItem(name: QueryItems.apiKeyQueryText, value: keychainService?.fetchKey(name: Constants.apiKey)),
             URLQueryItem(name: QueryItems.languageQueryText, value: UrlComponent.languageValueText),
             URLQueryItem(name: QueryItems.regionQueryText, value: UrlComponent.regionValueText)
         ]
