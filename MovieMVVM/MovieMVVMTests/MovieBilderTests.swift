@@ -10,10 +10,7 @@ final class MovieBilderTests: XCTestCase {
 
     private enum Constants {
         static let idNumber = 0
-        static let overviewText = ""
-        static let posterPathText = ""
-        static let releaseDateText = ""
-        static let titleText = ""
+        static let emptyText = ""
         static let voteAverageNumber = 0.0
         static let voteCoubtNumber = 0
     }
@@ -23,10 +20,10 @@ final class MovieBilderTests: XCTestCase {
     private var movieBilder: BilderProtocol?
     private var mockMovie = Movie(
         id: Constants.idNumber,
-        overview: Constants.overviewText,
-        posterPath: Constants.posterPathText,
-        releaseDate: Constants.releaseDateText,
-        title: Constants.titleText,
+        overview: Constants.emptyText,
+        posterPath: Constants.emptyText,
+        releaseDate: Constants.emptyText,
+        title: Constants.emptyText,
         voteAverage: Constants.voteAverageNumber,
         voteCount: Constants.voteCoubtNumber
     )
