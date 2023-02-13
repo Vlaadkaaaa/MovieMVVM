@@ -20,6 +20,7 @@ final class MovieViewModel: MovieViewModelProtocol {
 
     var updateViewDataHandler: MovieDataHandler?
     var updateMovieCellHandler: MovieDataStringHandler?
+    var currentCategory: MovieCategory = .popular
 
     // MARK: - Init
 
@@ -41,7 +42,6 @@ final class MovieViewModel: MovieViewModelProtocol {
     private let keychainService: KeychainServiceProtocol?
     private let networkService: NetworkServiceProtocol?
     private var coreDataService: CoreDataServiceProtocol?
-    private var currentCategory: MovieCategory = .popular
 
     // MARK: - Public Method
 
@@ -63,7 +63,7 @@ final class MovieViewModel: MovieViewModelProtocol {
         }
     }
 
-    func setupCategory(chose index: Int) {
+    func setupCategory(choose index: Int) {
         switch index {
         case 0:
             currentCategory = .popular

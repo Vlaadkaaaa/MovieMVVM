@@ -1,42 +1,38 @@
 // ApplicationCoordinator.swift
 // Copyright © Vlaadkaaaa. All rights reserved.
 
-import UIKit
+import Foundation
 
 /// Главный координатор
 final class ApplicationCoordinator: BaseCoordinator {
-    // MARK: - Private Properties
+    // MARK: - Public Property
 
-    private var bilder: BilderProtocol
-    private var navigationController: UINavigationController?
+    var bilder: BilderProtocol?
 
     // MARK: - Init
 
-    init(navigationController: UINavigationController? = nil, bilder: BilderProtocol) {
-        self.navigationController = navigationController
-        self.bilder = bilder
+    convenience init(biler: BilderProtocol?) {
+        self.init()
+        bilder = biler
     }
 
-    // MARK: - Public methods
+    // MARK: - Public Method
 
     override func start() {
-        showMainModule()
+        toMovieCoordinator()
     }
 
-    // MARK: - Private Methods
+    // MARK: - Private Method
 
-    private func showMainModule() {
-        guard let controller = bilder.createMainModule() as? MovieViewController else { return }
-        controller.toDetailViewControllerHandler = { [weak self] movie in
+    private func toMovieCoordinator() {
+        guard let bilder else { return }
+        let coordinator = MovieCoordinator(bilder: bilder)
+        coordinator.onFinishFlowHandler = { [weak self, weak coordinator] in
             guard let self else { return }
-            self.showDetailModule(movie: movie)
+            self.removeDependency(coordinator)
+            self.start()
         }
-        navigationController?.pushViewController(controller, animated: true)
-        setAsRoot(navigationController ?? UINavigationController())
-    }
-
-    private func showDetailModule(movie: Movie) {
-        let detailController = bilder.createDetailModule(movie: movie)
-        navigationController?.pushViewController(detailController, animated: true)
+        addDependency(coordinator)
+        coordinator.start()
     }
 }
