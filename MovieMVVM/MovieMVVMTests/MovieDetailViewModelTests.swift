@@ -29,6 +29,8 @@ final class MovieDetailViewModelTests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
+        mockNetworkService = nil
+        mockImageService = nil
         viewModel = nil
     }
 
