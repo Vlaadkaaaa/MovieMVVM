@@ -18,8 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.backgroundColor = .systemBackground
         window?.makeKeyAndVisible()
         let bilder = Bilder()
-        let navController = UINavigationController()
-        coordinator = ApplicationCoordinator(navigationController: navController, bilder: bilder)
+        coordinator = ApplicationCoordinator(biler: bilder)
         coordinator?.start()
     }
 }

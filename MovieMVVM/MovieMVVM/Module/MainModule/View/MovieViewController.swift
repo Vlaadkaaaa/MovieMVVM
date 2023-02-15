@@ -136,7 +136,7 @@ final class MovieViewController: UIViewController {
     }
 
     @objc private func changeSegmentAction(_ sender: UISegmentedControl) {
-        movieViewModel?.setupCategory(chose: sender.selectedSegmentIndex)
+        movieViewModel?.setupCategory(choose: sender.selectedSegmentIndex)
     }
 }
 
