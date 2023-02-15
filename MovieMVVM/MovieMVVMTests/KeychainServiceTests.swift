@@ -20,6 +20,7 @@ final class KeychainServiceTests: XCTestCase {
     // MARK: - Public Methods
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
         keychainService = KeychainService()
     }
 

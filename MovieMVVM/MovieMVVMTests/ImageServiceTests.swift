@@ -19,6 +19,7 @@ final class ImageServiceTests: XCTestCase {
     private var imageService: ImageServiceProtocol?
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
         mockProxy = MockProxy()
         guard let mockProxy else { return }
         imageService = ImageService(proxy: mockProxy)

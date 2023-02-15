@@ -18,6 +18,7 @@ final class BaseCoordinatorTests: XCTestCase {
     private var baseCoordinator: BaseCoordinator?
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
         mockCoordinator = MockCoordinator()
         baseCoordinator = BaseCoordinator()
     }

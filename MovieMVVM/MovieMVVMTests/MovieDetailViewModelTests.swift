@@ -23,6 +23,7 @@ final class MovieDetailViewModelTests: XCTestCase {
     // MARK: - Public Methods
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
         mockNetworkService = MockNetworkService()
         mockImageService = MockImageService()
         viewModel = MovieDetailViewModel(networkService: mockNetworkService, imageService: mockImageService)

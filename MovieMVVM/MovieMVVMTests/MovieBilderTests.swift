@@ -31,6 +31,7 @@ final class MovieBilderTests: XCTestCase {
     // MARK: - Public Methods
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
         movieBilder = Bilder()
     }
 

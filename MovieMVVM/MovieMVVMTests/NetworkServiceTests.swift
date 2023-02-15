@@ -20,6 +20,7 @@ final class NetworkServiceTests: XCTestCase {
     // MARK: - Public Methods
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
         mockNetworkService = MockNetworkService()
     }
 

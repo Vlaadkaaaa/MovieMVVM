@@ -20,6 +20,7 @@ final class FileManagerTests: XCTestCase {
     // MARK: - Public Method
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
         fileManager = FileManagerService()
     }
 

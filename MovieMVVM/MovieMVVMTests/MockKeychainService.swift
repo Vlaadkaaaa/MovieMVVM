@@ -11,8 +11,8 @@ final class MockKeychainService: KeychainServiceProtocol {
     private enum Constants {
         static let mockText = "mock"
     }
-
-    // MARK: - Public Properties
+    
+    // MARK: - Private Property
 
     private var keyValue: String?
 
