@@ -5,17 +5,6 @@ import UIKit
 
 /// Настройка ячейки с фильмом
 final class MovieViewCell: UITableViewCell {
-    // MARK: - Private Constants
-
-    private enum Constants {
-        static let movieAgeLimitTitle = "18+"
-        static let oneStarImageName = "oneStar"
-        static let twoStarImageName = "twoStar"
-        static let threeStarImageName = "threeStar"
-        static let fourStarImageName = "fourStar"
-        static let fiveStarImageName = "fiveStar"
-    }
-
     // MARK: - Private Visual Components
 
     private let moviePosterImageView: UIImageView = {

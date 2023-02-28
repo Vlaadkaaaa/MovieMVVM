@@ -5,15 +5,6 @@ import UIKit
 
 /// Экстеншен для универсального алерта
 extension UIViewController {
-    // MARK: - Constants
-
-    private enum Constants {
-        static let actionTitle = "Ок"
-        static let addTitle = "Введите ключ для получения доустпа"
-        static let addKetPlaceholder = "Введите ключ"
-        static let addActionTitle = "Добавить"
-        static let defaultTitle = "Ошибка"
-    }
 
     // MARK: - Public methods
 

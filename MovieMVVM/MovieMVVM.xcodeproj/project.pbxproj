@@ -66,6 +66,8 @@
 		CE16C3D92999E2B50095F137 /* MockImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16C3D82999E2B50095F137 /* MockImageService.swift */; };
 		CE16C3DD2999E6950095F137 /* FileManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16C3DC2999E6950095F137 /* FileManagerTests.swift */; };
 		CE16C3DF2999EC4A0095F137 /* MockCoreDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16C3DE2999EC4A0095F137 /* MockCoreDataService.swift */; };
+		CEF355CC299E9A3E00AF4438 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = CEF355CB299E9A3E00AF4438 /* Localizable.strings */; };
+		CEF355CE299E9A8B00AF4438 /* Strings+Generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF355CD299E9A8B00AF4438 /* Strings+Generated.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -143,6 +145,8 @@
 		CE16C3D82999E2B50095F137 /* MockImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockImageService.swift; sourceTree = "<group>"; };
 		CE16C3DC2999E6950095F137 /* FileManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerTests.swift; sourceTree = "<group>"; };
 		CE16C3DE2999EC4A0095F137 /* MockCoreDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCoreDataService.swift; sourceTree = "<group>"; };
+		CEF355CB299E9A3E00AF4438 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
+		CEF355CD299E9A8B00AF4438 /* Strings+Generated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Strings+Generated.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -207,6 +211,7 @@
 		55B2AA9329069D6B009F0BD7 /* MovieMVVM */ = {
 			isa = PBXGroup;
 			children = (
+				CEF355C9299E9A1700AF4438 /* Resources */,
 				CE16C2CA299232140095F137 /* App */,
 				CE16C22F299106620095F137 /* Model */,
 				CE16C236299107FA0095F137 /* Module */,
@@ -485,6 +490,23 @@
 			name = Mock;
 			sourceTree = "<group>";
 		};
+		CEF355C9299E9A1700AF4438 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				CEF355CB299E9A3E00AF4438 /* Localizable.strings */,
+				CEF355CA299E9A2500AF4438 /* SupportingFiles */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		CEF355CA299E9A2500AF4438 /* SupportingFiles */ = {
+			isa = PBXGroup;
+			children = (
+				CEF355CD299E9A8B00AF4438 /* Strings+Generated.swift */,
+			);
+			path = SupportingFiles;
+			sourceTree = "<group>";
+		};
 		FD9DDCB62AF45BB574EA6084 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -507,6 +529,7 @@
 				55B2AAA92906A021009F0BD7 /* SwiftFormater */,
 				55643E852906A49B0058B3A8 /* SwiftLint */,
 				A1AF6FFC4374A8F7669BF914 /* [CP] Embed Pods Frameworks */,
+				CEF355CF299E9B2500AF4438 /* SwiftGen */,
 			);
 			buildRules = (
 			);
@@ -579,6 +602,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				55B2AAA129069D71009F0BD7 /* LaunchScreen.storyboard in Resources */,
+				CEF355CC299E9A3E00AF4438 /* Localizable.strings in Resources */,
 				55B2AA9E29069D71009F0BD7 /* Assets.xcassets in Resources */,
 				55B2AA9C29069D6B009F0BD7 /* Main.storyboard in Resources */,
 			);
@@ -671,6 +695,25 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		CEF355CF299E9B2500AF4438 /* SwiftGen */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftGen;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftgen > /dev/null; then\n  swiftgen\nelse\n  echo \"warning: SwiftGen not installed, download from https://github.com/SwiftGen/SwiftGen\"\nfi\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -710,6 +753,7 @@
 				CE16C2CE29924AEC0095F137 /* FileManager.swift in Sources */,
 				CE16C2C92992222F0095F137 /* MovieDetailViewModel.swift in Sources */,
 				CE16C2D429924B860095F137 /* Proxy.swift in Sources */,
+				CEF355CE299E9A8B00AF4438 /* Strings+Generated.swift in Sources */,
 				CE16C3AC299562680095F137 /* CoreDataServiceProtocol.swift in Sources */,
 				CE16C3062992BA980095F137 /* UIVIewController+Extension.swift in Sources */,
 				CE16C28729915C620095F137 /* MovieViewModel.swift in Sources */,
