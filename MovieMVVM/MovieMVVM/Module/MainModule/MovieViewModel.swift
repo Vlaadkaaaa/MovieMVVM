@@ -5,17 +5,6 @@ import Foundation
 
 /// ViewModel для главного экрана
 final class MovieViewModel: MovieViewModelProtocol {
-    // MARK: - Private Constants
-
-    private enum Constants {
-        static let oneStarImageName = "oneStar"
-        static let twoStarImageName = "twoStar"
-        static let threeStarImageName = "threeStar"
-        static let fourStarImageName = "fourStar"
-        static let fiveStarImageName = "fiveStar"
-        static let apiKeyText = "apiKey"
-    }
-
     // MARK: - Public Property
 
     var updateViewDataHandler: MovieDataHandler?

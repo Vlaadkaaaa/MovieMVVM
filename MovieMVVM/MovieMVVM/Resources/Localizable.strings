@@ -1,0 +1,26 @@
+/* 
+  Localizable.strings
+  MovieMVVM
+
+  Created by Vladka on 16.02.2023.
+  
+*/
+
+"containerName" = "MovieMVVM";
+"oneStarImageName" = "oneStar";
+"twoStarImageName" = "twoStar";
+"threeStarImageName" = "threeStar";
+"fourStarImageName" = "fourStar";
+"fiveStarImageName" = "fiveStar";
+"apiKeyText" = "apiKey";
+"movieTitleText" = "Фильмы";
+"movieCellIdentifier" = "MovieCell";
+"popularText" = "Популярное";
+"upcomingText" = "Ожидаемые";
+"topRatedText" = "Лучшие";
+"movieAgeLimitTitle" = "18+";
+"actionTitle" = "Ок";
+"addTitle" = "Введите ключ для получения доустпа";
+"addKetPlaceholder" = "Введите ключ";
+"addActionTitle" = "Добавить";
+"defaultTitle" = "Ошибка";

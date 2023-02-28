@@ -5,18 +5,10 @@ import UIKit
 
 /// Главная страница со списком фильмов
 final class MovieViewController: UIViewController {
-    // MARK: Private Costants
-
-    private enum Constants {
-        static let segmentControlItems = ["Популярное", "Ожидаемые", "Лучшие"]
-        static let movieTitleText = "Фильмы"
-        static let movieCellIdentifier = "MovieCell"
-    }
-
     // MARK: - Private Visual Component
 
     private lazy var filtherMovieSegmentControl: UISegmentedControl = {
-        let segment = UISegmentedControl(items: Constants.segmentControlItems)
+        let segment = UISegmentedControl(items: [Constants.popularText, Constants.upcomingText, Constants.topRatedText])
         segment.translatesAutoresizingMaskIntoConstraints = false
         segment.selectedSegmentIndex = 0
         segment.addTarget(self, action: #selector(changeSegmentAction), for: .valueChanged)

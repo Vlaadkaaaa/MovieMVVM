@@ -6,12 +6,6 @@ import UIKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    // MARK: - Private Constants
-
-    private enum Constants {
-        static let persistentContainerName = "MovieMVVM"
-    }
-
     // MARK: - Public Property
 
     static let sharedAppDelegate: AppDelegate = {
@@ -22,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }()
 
     lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: Constants.persistentContainerName)
+        let container = NSPersistentContainer(name: Constants.containerName)
         container.loadPersistentStores { _, _ in
         }
         return container
